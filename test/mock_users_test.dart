@@ -8,7 +8,6 @@ void main() {
     for (final email in [
       'nearsoul.test@gmail.com',
       'phamkhanhduyvo@gmail.com',
-      'phamkhanhduyvo@gamil.com',
       'linh.tran@gmail.com',
       'minh.nguyen@outlook.com',
       'chuacohoso@gmail.com',

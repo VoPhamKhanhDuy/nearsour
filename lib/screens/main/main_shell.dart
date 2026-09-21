@@ -4,6 +4,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/cosmic_background.dart';
 import '../../widgets/onboarding_header.dart';
+import '../../widgets/status_badge.dart';
 import 'contacts_tab.dart';
 import 'profile_tab.dart';
 import 'radar_discover_tab.dart';
@@ -35,7 +36,7 @@ class _MainShellState extends State<MainShell> {
           child: Column(
             children: [
               // Không có nút back: đây là màn gốc của app. Trạng thái Online chỉ hiện đúng một chỗ, ở góc phải.
-              const OnboardingHeader(trailing: _OnlineBadge()),
+              const OnboardingHeader(trailing: StatusBadge(label: 'Online', color: AppColors.statusOnline)),
               Expanded(
                 child: switch (_index) {
                   0 => const RadarDiscoverTab(),
@@ -47,38 +48,6 @@ class _MainShellState extends State<MainShell> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _OnlineBadge extends StatelessWidget {
-  const _OnlineBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: AppColors.statusOnline,
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: AppColors.statusOnline.withValues(alpha: 0.8), blurRadius: 8)],
-            ),
-          ),
-          const SizedBox(width: 6),
-          const Text('Online', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-        ],
       ),
     );
   }

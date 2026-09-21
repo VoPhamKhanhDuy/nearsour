@@ -68,9 +68,7 @@ class _DiscoverRadarState extends State<DiscoverRadar> with SingleTickerProvider
                 border: Border.all(color: AppColors.lilac, width: 2),
                 boxShadow: [BoxShadow(color: AppColors.lilac.withValues(alpha: 0.5), blurRadius: 24)],
               ),
-              child: widget.avatarId != null
-                  ? AvatarImage(avatarId: widget.avatarId, size: 54)
-                  : const Icon(Icons.person, color: Colors.white, size: 28),
+              child: AvatarImage(avatarId: widget.avatarId, size: 54),
             ),
             const Positioned(
               bottom: 100,

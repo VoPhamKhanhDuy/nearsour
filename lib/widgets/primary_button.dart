@@ -37,11 +37,20 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: _isGradient ? (gradient ?? AppColors.primaryGradient) : null,
-        color: _isGradient ? null : const Color(0xFF1F1B42).withValues(alpha: 0.5),
+        color: _isGradient
+            ? null
+            : const Color(0xFF1F1B42).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(28),
-        border: _isGradient ? null : Border.all(color: AppColors.cyan, width: 1.5),
+        border: _isGradient
+            ? null
+            : Border.all(color: AppColors.cyan, width: 1.5),
         boxShadow: _isGradient
-            ? [BoxShadow(color: AppColors.purple.withValues(alpha: 0.5), blurRadius: 20)]
+            ? [
+                BoxShadow(
+                  color: AppColors.purple.withValues(alpha: 0.5),
+                  blurRadius: 20,
+                ),
+              ]
             : null,
       ),
       child: Material(
@@ -54,7 +63,10 @@ class PrimaryButton extends StatelessWidget {
                 ? const SizedBox(
                     width: 22,
                     height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
                   )
                 : Row(
                     mainAxisSize: MainAxisSize.min,
@@ -63,13 +75,18 @@ class PrimaryButton extends StatelessWidget {
                         Icon(icon, color: Colors.white, size: 22),
                         const SizedBox(width: 8),
                       ],
-                      Text(
-                        label,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.8,
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            label,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
                         ),
                       ),
                     ],
