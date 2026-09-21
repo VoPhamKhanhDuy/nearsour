@@ -14,7 +14,10 @@ import '../main/main_shell.dart';
 class RadarPermissionScreen extends StatefulWidget {
   final LocationService locationService;
 
-  const RadarPermissionScreen({super.key, this.locationService = const GeolocatorLocationService()});
+  const RadarPermissionScreen({
+    super.key,
+    this.locationService = const GeolocatorLocationService(),
+  });
 
   @override
   State<RadarPermissionScreen> createState() => _RadarPermissionScreenState();
@@ -22,7 +25,8 @@ class RadarPermissionScreen extends StatefulWidget {
 
 enum _Phase { idle, requesting, granted, blocked }
 
-class _RadarPermissionScreenState extends State<RadarPermissionScreen> with WidgetsBindingObserver {
+class _RadarPermissionScreenState extends State<RadarPermissionScreen>
+    with WidgetsBindingObserver {
   static const _successPause = Duration(milliseconds: 800);
 
   _Phase _phase = _Phase.idle;
@@ -45,7 +49,9 @@ class _RadarPermissionScreenState extends State<RadarPermissionScreen> with Widg
   Future<void> _checkExisting() async {
     try {
       final result = await widget.locationService.checkPermission();
-      if (mounted && result == LocationPermissionResult.granted && _phase == _Phase.idle) {
+      if (mounted &&
+          result == LocationPermissionResult.granted &&
+          _phase == _Phase.idle) {
         await _onGranted();
       }
     } catch (_) {
@@ -121,7 +127,9 @@ class _RadarPermissionScreenState extends State<RadarPermissionScreen> with Widg
           child: Column(
             children: [
               OnboardingHeader(
-                onBack: Navigator.of(context).canPop() ? () => Navigator.of(context).pop() : null,
+                onBack: Navigator.of(context).canPop()
+                    ? () => Navigator.of(context).pop()
+                    : null,
                 actionLabel: 'Bỏ qua',
                 onAction: _finish,
               ),
@@ -144,26 +152,41 @@ class _RadarPermissionScreenState extends State<RadarPermissionScreen> with Widg
                               _WarningBox(
                                 reason: _blockedReason,
                                 onOpenSettings: _needsSettings
-                                    ? () => widget.locationService.openSettings(_blockedReason)
+                                    ? () => widget.locationService.openSettings(
+                                        _blockedReason,
+                                      )
                                     : null,
                               ),
                             ],
                             const Spacer(),
                             const SizedBox(height: 24),
                             PrimaryButton(
-                              label: granted ? 'Đã kích hoạt Radar' : 'Kích hoạt Radar',
-                              icon: granted ? Icons.check_circle_outline : Icons.radar,
+                              label: granted
+                                  ? 'Đã kích hoạt Radar'
+                                  : 'Kích hoạt Radar',
+                              icon: granted
+                                  ? Icons.check_circle_outline
+                                  : Icons.radar,
                               loading: _phase == _Phase.requesting,
                               gradient: granted
-                                  ? const LinearGradient(colors: [Color(0xFF16A34A), Color(0xFF22C55E)])
+                                  ? const LinearGradient(
+                                      colors: [
+                                        Color(0xFF16A34A),
+                                        Color(0xFF22C55E),
+                                      ],
+                                    )
                                   : null,
                               onPressed: granted ? null : _activate,
                             ),
                             const SizedBox(height: 4),
                             TextButton(
-                              onPressed: granted || _phase == _Phase.requesting ? null : _decline,
+                              onPressed: granted || _phase == _Phase.requesting
+                                  ? null
+                                  : _decline,
                               style: TextButton.styleFrom(
-                                foregroundColor: Colors.white.withValues(alpha: 0.65),
+                                foregroundColor: Colors.white.withValues(
+                                  alpha: 0.65,
+                                ),
                                 minimumSize: const Size(0, 40),
                               ),
                               child: const Text(
@@ -178,7 +201,10 @@ class _RadarPermissionScreenState extends State<RadarPermissionScreen> with Widg
                             Text(
                               'Bạn có thể tắt quyền vị trí bất cứ lúc nào trong Cài đặt',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                fontSize: 11,
+                              ),
                             ),
                           ],
                         ),
@@ -230,7 +256,11 @@ class _ScanBadge extends StatelessWidget {
           SizedBox(width: 6),
           Text(
             'Đang quét khu vực...',
-            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -252,7 +282,12 @@ class _Intro extends StatelessWidget {
             color: Colors.white,
             fontSize: 28,
             fontWeight: FontWeight.w800,
-            shadows: [Shadow(color: AppColors.magenta.withValues(alpha: 0.6), blurRadius: 24)],
+            shadows: [
+              Shadow(
+                color: AppColors.magenta.withValues(alpha: 0.6),
+                blurRadius: 24,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),
@@ -261,7 +296,11 @@ class _Intro extends StatelessWidget {
           child: Text(
             'NearSoul cần quyền truy cập vị trí để phát hiện những người phù hợp trong bán kính 200m xung quanh bạn.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFFCDC3D5), fontSize: 14.5, height: 1.5),
+            style: TextStyle(
+              color: Color(0xFFCDC3D5),
+              fontSize: 14.5,
+              height: 1.5,
+            ),
           ),
         ),
       ],
@@ -281,7 +320,10 @@ class _PrivacyCard extends StatelessWidget {
         children: [
           _PrivacyRow(icon: Icons.lock_outline, text: 'Bảo mật tuyệt đối'),
           SizedBox(height: 14),
-          _PrivacyRow(icon: Icons.visibility_off_outlined, text: 'Không thấy vị trí chính xác'),
+          _PrivacyRow(
+            icon: Icons.visibility_off_outlined,
+            text: 'Không thấy vị trí chính xác',
+          ),
           SizedBox(height: 14),
           _PrivacyRow(icon: Icons.bolt, text: 'Chỉ hoạt động khi mở app'),
         ],
@@ -305,7 +347,11 @@ class _PrivacyRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(color: Color(0xFFC8C0E8), fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Color(0xFFC8C0E8),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -320,10 +366,11 @@ class _WarningBox extends StatelessWidget {
   const _WarningBox({required this.reason, required this.onOpenSettings});
 
   String get _message => switch (reason) {
-        LocationPermissionResult.serviceDisabled => 'Hãy bật dịch vụ vị trí (GPS) của thiết bị để dùng NearSoul',
-        LocationPermissionResult.deniedForever => 'Quyền vị trí đang bị chặn. Bạn cần bật lại trong Cài đặt để dùng NearSoul',
-        _ => 'Bạn cần cấp quyền vị trí để sử dụng NearSoul',
-      };
+    LocationPermissionResult.serviceDisabled =>
+      'Hãy bật dịch vụ vị trí (GPS) của thiết bị để dùng NearSoul',
+    LocationPermissionResult.deniedForever => 'Quyền vị trí đang bị chặn. Bạn cần bật lại trong Cài đặt để dùng NearSoul',
+    _ => 'Bạn cần cấp quyền vị trí để sử dụng NearSoul',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +389,11 @@ class _WarningBox extends StatelessWidget {
           Text(
             _message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFFFF9090), fontSize: 13, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Color(0xFFFF9090),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           if (onOpenSettings != null) ...[
             const SizedBox(height: 6),

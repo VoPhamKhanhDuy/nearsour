@@ -65,7 +65,8 @@ class _AuthTextFieldState extends State<AuthTextField> {
     super.dispose();
   }
 
-  static OutlineInputBorder _border(Color color, [double width = 1]) => OutlineInputBorder(
+  static OutlineInputBorder _border(Color color, [double width = 1]) =>
+      OutlineInputBorder(
         borderRadius: BorderRadius.circular(30),
         borderSide: BorderSide(color: color, width: width),
       );
@@ -96,14 +97,19 @@ class _AuthTextFieldState extends State<AuthTextField> {
             ? IconButton(
                 onPressed: () => setState(() => _obscure = !_obscure),
                 icon: Icon(
-                  _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                   color: muted,
                 ),
               )
             : null,
         helperText: widget.helperText,
         helperMaxLines: 3,
-        helperStyle: TextStyle(color: muted.withValues(alpha: 0.7), fontSize: 12.5),
+        helperStyle: TextStyle(
+          color: muted.withValues(alpha: 0.7),
+          fontSize: 12.5,
+        ),
         errorText: widget.errorText,
         errorMaxLines: 3,
         errorStyle: const TextStyle(color: AppColors.error, fontSize: 12.5),

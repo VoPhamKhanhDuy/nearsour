@@ -15,7 +15,8 @@ class RadarView extends StatefulWidget {
   State<RadarView> createState() => _RadarViewState();
 }
 
-class _RadarViewState extends State<RadarView> with SingleTickerProviderStateMixin {
+class _RadarViewState extends State<RadarView>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 4),
@@ -54,8 +55,16 @@ class _RadarViewState extends State<RadarView> with SingleTickerProviderStateMix
                   child: CustomPaint(painter: _RadarPainter(_controller)),
                 ),
               ),
-              const Positioned(top: 6, right: -34, child: _RadarBadge(label: '12 người gần bạn')),
-              const Positioned(bottom: 16, left: -20, child: _RadarBadge(label: 'bán kính 200m')),
+              const Positioned(
+                top: 6,
+                right: -34,
+                child: _RadarBadge(label: '12 người gần bạn'),
+              ),
+              const Positioned(
+                bottom: 16,
+                left: -20,
+                child: _RadarBadge(label: 'bán kính 200m'),
+              ),
             ],
           ),
         ),
@@ -87,13 +96,22 @@ class _RadarBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.cyan,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: AppColors.cyan.withValues(alpha: 0.8), blurRadius: 8)],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.cyan.withValues(alpha: 0.8),
+                  blurRadius: 8,
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(color: AppColors.cyan, fontSize: 11, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: AppColors.cyan,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -107,7 +125,13 @@ class _RadarPainter extends CustomPainter {
   _RadarPainter(this.t) : super(repaint: t);
 
   // (góc rad, tỉ lệ khoảng cách so với bán kính) — vị trí mock của những người quanh đây.
-  static const _blips = [(-2.4, 0.72), (-0.2, 0.86), (0.8, 0.52), (2.55, 0.64), (-1.2, 0.4)];
+  static const _blips = [
+    (-2.4, 0.72),
+    (-0.2, 0.86),
+    (0.8, 0.52),
+    (2.55, 0.64),
+    (-1.2, 0.4),
+  ];
   static const _labels = ['50m', '100m', '200m'];
 
   @override
@@ -121,7 +145,10 @@ class _RadarPainter extends CustomPainter {
       r,
       Paint()
         ..shader = RadialGradient(
-          colors: [AppColors.cyan.withValues(alpha: 0.12), AppColors.cyan.withValues(alpha: 0.02)],
+          colors: [
+            AppColors.cyan.withValues(alpha: 0.12),
+            AppColors.cyan.withValues(alpha: 0.02),
+          ],
         ).createShader(Rect.fromCircle(center: c, radius: r)),
     );
 
@@ -146,7 +173,11 @@ class _RadarPainter extends CustomPainter {
       final label = TextPainter(
         text: TextSpan(
           text: _labels[i],
-          style: TextStyle(color: AppColors.cyan.withValues(alpha: 0.6), fontSize: 9, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.cyan.withValues(alpha: 0.6),
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -167,7 +198,10 @@ class _RadarPainter extends CustomPainter {
         ..shader = SweepGradient(
           startAngle: 1.5 * pi,
           endAngle: 2 * pi,
-          colors: [AppColors.cyan.withValues(alpha: 0), AppColors.cyan.withValues(alpha: 0.35)],
+          colors: [
+            AppColors.cyan.withValues(alpha: 0),
+            AppColors.cyan.withValues(alpha: 0.35),
+          ],
         ).createShader(sweepRect),
     );
     canvas.drawLine(

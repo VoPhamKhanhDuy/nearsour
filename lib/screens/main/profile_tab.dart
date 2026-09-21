@@ -12,11 +12,11 @@ class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   static String _genderLabel(String? gender) => switch (gender) {
-        'male' => 'Nam',
-        'female' => 'Nữ',
-        'other' => 'Khác',
-        _ => '—',
-      };
+    'male' => 'Nam',
+    'female' => 'Nữ',
+    'other' => 'Khác',
+    _ => '—',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +29,28 @@ class ProfileTab extends StatelessWidget {
           AvatarImage(avatarId: user?.avatarId, size: 96),
           const SizedBox(height: 16),
           Text(
-            user?.nickname == null ? 'Chưa đặt biệt danh' : 'Xin chào, ${user!.nickname}',
-            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+            user?.nickname == null
+                ? 'Chưa đặt biệt danh'
+                : 'Xin chào, ${user!.nickname}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
-          Text(user?.email ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 15)),
+          Text(
+            user?.email ?? '',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+          ),
           const SizedBox(height: 24),
           GlowCard(
             child: Column(
               children: [
-                _InfoRow(label: 'Năm sinh', value: user?.birthYear?.toString() ?? '—'),
+                _InfoRow(
+                  label: 'Năm sinh',
+                  value: user?.birthYear?.toString() ?? '—',
+                ),
                 const Divider(height: 24, color: Color(0x1AFFFFFF)),
                 _InfoRow(label: 'Giới tính', value: _genderLabel(user?.gender)),
               ],
@@ -73,8 +85,18 @@ class _InfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Color(0xFFB0A8D0), fontSize: 14)),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: const TextStyle(color: Color(0xFFB0A8D0), fontSize: 14),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

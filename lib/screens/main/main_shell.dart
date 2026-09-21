@@ -11,7 +11,10 @@ import 'radar_discover_tab.dart';
 
 /// Khung chính của app sau khi thiết lập xong: header, nội dung theo tab và thanh điều hướng dưới.
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  /// Dòng thông báo nhẹ hiện một lần khi vào màn (ví dụ "Kết nối đã kết thúc, tiếp tục quét...").
+  final String? notice;
+
+  const MainShell({super.key, this.notice});
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -19,12 +22,38 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   static const _items = [
-    AppNavItem(icon: Icons.explore_outlined, activeIcon: Icons.explore, label: 'Radar'),
-    AppNavItem(icon: Icons.contacts_outlined, activeIcon: Icons.contacts, label: 'Danh bạ'),
-    AppNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Cá nhân'),
+    AppNavItem(
+      icon: Icons.explore_outlined,
+      activeIcon: Icons.explore,
+      label: 'Radar',
+    ),
+    AppNavItem(
+      icon: Icons.contacts_outlined,
+      activeIcon: Icons.contacts,
+      label: 'Danh bạ',
+    ),
+    AppNavItem(
+      icon: Icons.person_outline,
+      activeIcon: Icons.person,
+      label: 'Cá nhân',
+    ),
   ];
 
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final notice = widget.notice;
+    if (notice != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(notice)));
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +65,12 @@ class _MainShellState extends State<MainShell> {
           child: Column(
             children: [
               // Không có nút back: đây là màn gốc của app. Trạng thái Online chỉ hiện đúng một chỗ, ở góc phải.
-              const OnboardingHeader(trailing: StatusBadge(label: 'Online', color: AppColors.statusOnline)),
+              const OnboardingHeader(
+                trailing: StatusBadge(
+                  label: 'Online',
+                  color: AppColors.statusOnline,
+                ),
+              ),
               Expanded(
                 child: switch (_index) {
                   0 => const RadarDiscoverTab(),
@@ -44,7 +78,11 @@ class _MainShellState extends State<MainShell> {
                   _ => const ProfileTab(),
                 },
               ),
-              AppBottomNav(items: _items, index: _index, onChanged: (i) => setState(() => _index = i)),
+              AppBottomNav(
+                items: _items,
+                index: _index,
+                onChanged: (i) => setState(() => _index = i),
+              ),
             ],
           ),
         ),

@@ -17,7 +17,9 @@ class Validators {
   static String? nickname(String? v) {
     final value = (v ?? '').trim();
     if (value.isEmpty) return 'Vui lòng nhập biệt danh';
-    if (value.length < 2 || value.length > 20) return 'Biệt danh phải từ 2 đến 20 ký tự';
+    if (value.length < 2 || value.length > 20) {
+      return 'Biệt danh phải từ 2 đến 20 ký tự';
+    }
     return null;
   }
 

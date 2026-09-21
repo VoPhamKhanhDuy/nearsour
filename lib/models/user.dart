@@ -37,7 +37,7 @@ class AppUser {
     List<String>? blockedUsers,
     List<String>? friendIds,
     DateTime? createdAt,
-  })  : blockedUsers = blockedUsers ?? [],
-        friendIds = friendIds ?? [],
-        createdAt = createdAt ?? DateTime.now();
+  }) : blockedUsers = blockedUsers ?? [],
+       friendIds = friendIds ?? [],
+       createdAt = createdAt ?? DateTime.now();
 }

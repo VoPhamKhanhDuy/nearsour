@@ -30,7 +30,9 @@ class Intro48hScreen extends StatelessWidget {
           child: Column(
             children: [
               OnboardingHeader(
-                onBack: Navigator.of(context).canPop() ? () => Navigator.of(context).pop() : null,
+                onBack: Navigator.of(context).canPop()
+                    ? () => Navigator.of(context).pop()
+                    : null,
               ),
               Expanded(
                 child: CustomScrollView(
@@ -50,7 +52,10 @@ class Intro48hScreen extends StatelessWidget {
                             const _StatsRow(),
                             const Spacer(),
                             const SizedBox(height: 24),
-                            PrimaryButton(label: 'Bắt đầu ngay →', onPressed: () => _finish(context)),
+                            PrimaryButton(
+                              label: 'Bắt đầu ngay →',
+                              onPressed: () => _finish(context),
+                            ),
                           ],
                         ),
                       ),
@@ -78,10 +83,20 @@ class _WindowCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.fieldBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.magenta.withValues(alpha: 0.6), width: 1.5),
+        border: Border.all(
+          color: AppColors.magenta.withValues(alpha: 0.6),
+          width: 1.5,
+        ),
         boxShadow: [
-          BoxShadow(color: AppColors.magenta.withValues(alpha: 0.25), blurRadius: 32),
-          const BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 8)),
+          BoxShadow(
+            color: AppColors.magenta.withValues(alpha: 0.25),
+            blurRadius: 32,
+          ),
+          const BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
         ],
       ),
       child: Column(
@@ -93,7 +108,12 @@ class _WindowCard extends StatelessWidget {
               fontSize: 76,
               height: 1,
               fontWeight: FontWeight.w800,
-              shadows: [Shadow(color: AppColors.magenta.withValues(alpha: 0.8), blurRadius: 32)],
+              shadows: [
+                Shadow(
+                  color: AppColors.magenta.withValues(alpha: 0.8),
+                  blurRadius: 32,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 6),
@@ -119,15 +139,27 @@ class _WindowCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: _Step(icon: Icons.psychology_alt_outlined, title: 'AI Quiz', caption: 'Tìm người hợp tính'),
+                  child: _Step(
+                    icon: Icons.psychology_alt_outlined,
+                    title: 'AI Quiz',
+                    caption: 'Tìm người hợp tính',
+                  ),
                 ),
                 _StepDivider(),
                 Expanded(
-                  child: _Step(icon: Icons.chat_bubble_outline, title: 'Chat', caption: 'Ẩn danh 48 giờ'),
+                  child: _Step(
+                    icon: Icons.chat_bubble_outline,
+                    title: 'Chat',
+                    caption: 'Ẩn danh 48 giờ',
+                  ),
                 ),
                 _StepDivider(),
                 Expanded(
-                  child: _Step(icon: Icons.handshake_outlined, title: 'Gặp nhau', caption: 'Hẹn gặp ngoài đời'),
+                  child: _Step(
+                    icon: Icons.handshake_outlined,
+                    title: 'Gặp nhau',
+                    caption: 'Hẹn gặp ngoài đời',
+                  ),
                 ),
               ],
             ),
@@ -163,13 +195,21 @@ class _Step extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           caption,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Intro48hScreen._subtle, fontSize: 11, height: 1.3),
+          style: const TextStyle(
+            color: Intro48hScreen._subtle,
+            fontSize: 11,
+            height: 1.3,
+          ),
         ),
       ],
     );
@@ -181,7 +221,11 @@ class _StepDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, margin: const EdgeInsets.symmetric(vertical: 6), color: Colors.white.withValues(alpha: 0.1));
+    return Container(
+      width: 1,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      color: Colors.white.withValues(alpha: 0.1),
+    );
   }
 }
 
@@ -200,7 +244,12 @@ class _Intro extends StatelessWidget {
             fontSize: 26,
             height: 1.2,
             fontWeight: FontWeight.w800,
-            shadows: [Shadow(color: AppColors.magenta.withValues(alpha: 0.6), blurRadius: 28)],
+            shadows: [
+              Shadow(
+                color: AppColors.magenta.withValues(alpha: 0.6),
+                blurRadius: 28,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),
@@ -209,7 +258,11 @@ class _Intro extends StatelessWidget {
           child: Text(
             'Trả lời câu hỏi AI để tìm người hợp tư duy — chat ẩn danh 48 giờ trước khi gặp nhau ngoài đời.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFFC8C0E8), fontSize: 13.5, height: 1.6),
+            style: TextStyle(
+              color: Color(0xFFC8C0E8),
+              fontSize: 13.5,
+              height: 1.6,
+            ),
           ),
         ),
       ],
@@ -225,9 +278,21 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Expanded(child: _StatTile(value: '5', label: 'Câu hỏi AI', color: AppColors.magenta)),
+        Expanded(
+          child: _StatTile(
+            value: '5',
+            label: 'Câu hỏi AI',
+            color: AppColors.magenta,
+          ),
+        ),
         SizedBox(width: 12),
-        Expanded(child: _StatTile(value: '3/5', label: 'Câu trùng để mở chat', color: AppColors.cyan)),
+        Expanded(
+          child: _StatTile(
+            value: '3/5',
+            label: 'Câu trùng để mở chat',
+            color: AppColors.cyan,
+          ),
+        ),
       ],
     );
   }
@@ -238,7 +303,11 @@ class _StatTile extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _StatTile({required this.value, required this.label, required this.color});
+  const _StatTile({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -251,12 +320,23 @@ class _StatTile extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(value, style: TextStyle(color: color, fontSize: 26, fontWeight: FontWeight.w800)),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFFB0A8D0), fontSize: 12, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Color(0xFFB0A8D0),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),

@@ -14,7 +14,8 @@ class PulseRadar extends StatefulWidget {
   State<PulseRadar> createState() => _PulseRadarState();
 }
 
-class _PulseRadarState extends State<PulseRadar> with SingleTickerProviderStateMixin {
+class _PulseRadarState extends State<PulseRadar>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 3),
@@ -49,13 +50,20 @@ class _PulseRadarState extends State<PulseRadar> with SingleTickerProviderStateM
             alignment: Alignment.center,
             children: [
               Positioned.fill(
-                child: RepaintBoundary(child: CustomPaint(painter: _PulsePainter(_controller))),
+                child: RepaintBoundary(
+                  child: CustomPaint(painter: _PulsePainter(_controller)),
+                ),
               ),
               Icon(
                 Icons.location_on,
                 size: 52,
                 color: Colors.white,
-                shadows: [Shadow(color: AppColors.magenta.withValues(alpha: 0.9), blurRadius: 18)],
+                shadows: [
+                  Shadow(
+                    color: AppColors.magenta.withValues(alpha: 0.9),
+                    blurRadius: 18,
+                  ),
+                ],
               ),
             ],
           ),
@@ -102,7 +110,8 @@ class _PulsePainter extends CustomPainter {
       canvas.drawCircle(
         c,
         12 + (r - 12) * phase,
-        Paint()..color = AppColors.magenta.withValues(alpha: 0.35 * (1 - phase)),
+        Paint()
+          ..color = AppColors.magenta.withValues(alpha: 0.35 * (1 - phase)),
       );
     }
 
@@ -110,7 +119,8 @@ class _PulsePainter extends CustomPainter {
     for (var i = 0; i < _dots.length; i++) {
       final (angle, frac, cyan) = _dots[i];
       final float = sin(t.value * 2 * pi + i * 1.3) * 5;
-      final p = c + Offset(cos(angle), sin(angle)) * (r * frac) + Offset(0, float);
+      final p =
+          c + Offset(cos(angle), sin(angle)) * (r * frac) + Offset(0, float);
       final color = cyan ? AppColors.cyan : AppColors.magenta;
       canvas.drawCircle(
         p,

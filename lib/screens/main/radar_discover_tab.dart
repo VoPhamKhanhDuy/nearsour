@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../mock/mock_data.dart';
+import '../../models/match.dart';
+import '../../models/user.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/discover_radar.dart';
 import '../../widgets/glow_card.dart';
 import '../../widgets/primary_button.dart';
-import '../../models/user.dart';
 import '../match/get_ready_screen.dart';
 import 'stranger_preview_sheet.dart';
 
@@ -16,13 +17,14 @@ class RadarDiscoverTab extends StatefulWidget {
   /// Thời gian (giả lập) từ lúc bật quét đến lúc "tìm thấy" một người.
   final Duration findDelay;
 
-  /// Thời gian (giả lập) để người kia đồng ý sau khi bạn gửi yêu cầu kết nối.
-  final Duration acceptDelay;
+  /// Thời gian (giả lập) sau khi bật quét thì có người gửi yêu cầu kết nối đến bạn (một lần mỗi phiên).
+  /// Null = tắt giả lập này.
+  final Duration? incomingDelay;
 
   const RadarDiscoverTab({
     super.key,
     this.findDelay = const Duration(seconds: 3),
-    this.acceptDelay = const Duration(seconds: 2),
+    this.incomingDelay = const Duration(seconds: 20),
   });
 
   @override
@@ -30,21 +32,32 @@ class RadarDiscoverTab extends StatefulWidget {
 }
 
 class _RadarDiscoverTabState extends State<RadarDiscoverTab> {
+  /// Người gửi chỉ thấy một dòng trung tính này khi yêu cầu không thành: người kia từ chối hay im lặng đều như nhau.
+  static const _noConnectionMessage =
+      'Không tìm thấy kết nối lúc này, tiếp tục quét...';
+
   late bool _scanning = MockUserStore.currentUser?.isScanning ?? false;
-  final _skipped = <String>{}; // những người đã bỏ qua trong phiên này
+  final _skipped =
+      <
+        String
+      >{}; // những người đã bỏ qua hoặc không kết nối được trong phiên này
+  bool _sheetOpen = false;
+  bool _incomingShown = false;
   Timer? _findTimer;
-  Timer? _acceptTimer;
+  Timer? _incomingTimer;
+  Timer? _mockResponseTimer;
 
   @override
   void initState() {
     super.initState();
-    if (_scanning) _scheduleFind();
+    if (_scanning) _startTimers();
   }
 
   @override
   void dispose() {
     _findTimer?.cancel();
-    _acceptTimer?.cancel();
+    _incomingTimer?.cancel();
+    _mockResponseTimer?.cancel();
     super.dispose();
   }
 
@@ -52,21 +65,39 @@ class _RadarDiscoverTabState extends State<RadarDiscoverTab> {
     setState(() => _scanning = value);
     MockUserStore.currentUser?.isScanning = value;
     if (value) {
-      _scheduleFind();
+      _startTimers();
     } else {
       _findTimer?.cancel();
+      _incomingTimer?.cancel();
     }
   }
 
   void _toggle() => _setScanning(!_scanning);
+
+  void _startTimers() {
+    _scheduleFind();
+    _scheduleIncoming(widget.incomingDelay);
+  }
 
   void _scheduleFind() {
     _findTimer?.cancel();
     _findTimer = Timer(widget.findDelay, _onFound);
   }
 
+  void _scheduleIncoming(Duration? delay) {
+    _incomingTimer?.cancel();
+    if (delay == null || _incomingShown) return;
+    _incomingTimer = Timer(delay, _onIncoming);
+  }
+
+  // ---- Phía người gửi: radar tìm thấy một người ----
+
   Future<void> _onFound() async {
     if (!mounted || !_scanning) return;
+    if (_sheetOpen) {
+      _scheduleFind();
+      return;
+    }
 
     final person = MockUserStore.nextNearby(skipped: _skipped);
     if (person == null) {
@@ -75,34 +106,105 @@ class _RadarDiscoverTabState extends State<RadarDiscoverTab> {
       return;
     }
 
-    final action = await showStrangerPreview(context, person);
+    Match? sent;
+    _sheetOpen = true;
+    final result = await showStrangerPreview(
+      context,
+      person,
+      onSend: () {
+        sent = MockUserStore.sendRequest(person.user.id);
+        return _mockResponse(person, sent!);
+      },
+    );
+    _sheetOpen = false;
+    _mockResponseTimer?.cancel();
     if (!mounted) return;
 
     final name = person.user.nickname ?? 'người này';
-    switch (action) {
-      case StrangerAction.skip:
-        _skipped.add(person.user.id);
-        _scheduleFind();
-      case StrangerAction.block:
+    switch (result) {
+      case SheetResult.block:
         MockUserStore.blockUser(person.user.id);
         _snack('Đã chặn $name. Họ sẽ không xuất hiện lại với bạn.');
         _scheduleFind();
-      case StrangerAction.connect:
-        final match = MockUserStore.sendRequest(person.user.id);
-        _setScanning(false);
-        _snack('Đã gửi yêu cầu kết nối tới $name. Đang chờ họ phản hồi…');
-        // Giả lập người kia đồng ý sau ít giây rồi cả hai vào Get Ready.
-        _acceptTimer = Timer(
-          widget.acceptDelay,
-          () => _onAccepted(match.id, person.user),
-        );
+      case SheetResult.accepted:
+        _openGetReady(partner: person.user);
+      case SheetResult.noResponse:
+        // Từ chối và hết hạn xử lý HOÀN TOÀN GIỐNG NHAU: không nói ai từ chối, radar quét tiếp.
+        if (sent != null) MockUserStore.expireRequest(sent!.id);
+        _skipped.add(person.user.id);
+        _snack(_noConnectionMessage);
+        _scheduleFind();
+      case SheetResult.skip || SheetResult.declined || SheetResult.expired:
+        _skipped.add(person.user.id);
+        _scheduleFind();
     }
   }
 
-  void _onAccepted(String matchId, AppUser partner) {
+  /// Giả lập phản hồi của người kia theo [NearbyPerson.response]. Người im lặng thì Future không bao giờ hoàn thành
+  /// (sheet tự hết hạn sau 30 giây).
+  Future<bool> _mockResponse(NearbyPerson person, Match match) {
+    final completer = Completer<bool>();
+    if (person.response != MockResponse.ignore) {
+      _mockResponseTimer = Timer(person.responseDelay, () {
+        final accepted = person.response == MockResponse.accept;
+        if (accepted) {
+          MockUserStore.acceptRequest(match.id);
+        } else {
+          MockUserStore.declineRequest(match.id);
+        }
+        completer.complete(accepted);
+      });
+    }
+    return completer.future;
+  }
+
+  // ---- Phía người nhận: có người gửi yêu cầu đến bạn ----
+
+  Future<void> _onIncoming() async {
+    if (!mounted || !_scanning) return;
+    if (_sheetOpen) {
+      // Chờ sheet đang mở đóng lại rồi thử lại.
+      _scheduleIncoming(const Duration(seconds: 5));
+      return;
+    }
+    _incomingShown = true;
+    _findTimer
+        ?.cancel(); // tạm dừng "tìm thấy người" trong lúc xử lý yêu cầu đến
+    final person = MockUserStore.incomingRequester;
+    final match = MockUserStore.receiveRequest(person.user.id);
+
+    _sheetOpen = true;
+    final result = await showIncomingRequest(context, person);
+    _sheetOpen = false;
+    if (!mounted) return;
+
+    switch (result) {
+      case SheetResult.accepted:
+        MockUserStore.acceptRequest(match.id);
+        _openGetReady(partner: person.user);
+      case SheetResult.block:
+        MockUserStore.declineRequest(match.id);
+        MockUserStore.blockUser(person.user.id);
+        _snack(
+          'Đã chặn ${person.user.nickname}. Họ sẽ không xuất hiện lại với bạn.',
+        );
+        _scheduleFind();
+      case SheetResult.expired:
+        MockUserStore.expireRequest(match.id);
+        _scheduleFind();
+      case SheetResult.declined || SheetResult.skip || SheetResult.noResponse:
+        // Từ chối: chỉ đóng sheet, không cần xác nhận gì thêm.
+        MockUserStore.declineRequest(match.id);
+        _scheduleFind();
+    }
+  }
+
+  // ---- Chung ----
+
+  void _openGetReady({required AppUser partner}) {
     final me = MockUserStore.currentUser;
-    if (!mounted || me == null) return;
-    MockUserStore.acceptRequest(matchId);
+    if (me == null) return;
+    _setScanning(false);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     Navigator.of(context).push(
       MaterialPageRoute<void>(

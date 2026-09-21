@@ -12,7 +12,11 @@ class CosmicBackground extends StatelessWidget {
   final Widget child;
   final CosmicStyle style;
 
-  const CosmicBackground({super.key, required this.child, this.style = CosmicStyle.auth});
+  const CosmicBackground({
+    super.key,
+    required this.child,
+    this.style = CosmicStyle.auth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,18 +32,52 @@ class CosmicBackground extends StatelessWidget {
                 : const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppColors.bgTop, AppColors.bgMid, AppColors.bgBottom],
+                    colors: [
+                      AppColors.bgTop,
+                      AppColors.bgMid,
+                      AppColors.bgBottom,
+                    ],
                   ),
           ),
         ),
         if (onboarding) ...const [
-          _Glow(alignment: Alignment.bottomLeft, color: AppColors.magenta, opacity: 0.40, size: 520),
-          _Glow(alignment: Alignment.topRight, color: AppColors.cyan, opacity: 0.35, size: 480),
-          _Glow(alignment: Alignment.center, color: AppColors.deepPurple, opacity: 0.50, size: 520),
+          _Glow(
+            alignment: Alignment.bottomLeft,
+            color: AppColors.magenta,
+            opacity: 0.40,
+            size: 520,
+          ),
+          _Glow(
+            alignment: Alignment.topRight,
+            color: AppColors.cyan,
+            opacity: 0.35,
+            size: 480,
+          ),
+          _Glow(
+            alignment: Alignment.center,
+            color: AppColors.deepPurple,
+            opacity: 0.50,
+            size: 520,
+          ),
         ] else ...const [
-          _Glow(alignment: Alignment(-1.4, -0.5), color: AppColors.purple, opacity: 0.20, size: 300),
-          _Glow(alignment: Alignment(1.4, 0.5), color: AppColors.cyan, opacity: 0.15, size: 300),
-          _Glow(alignment: Alignment.center, color: AppColors.purple, opacity: 0.30, size: 380),
+          _Glow(
+            alignment: Alignment(-1.4, -0.5),
+            color: AppColors.purple,
+            opacity: 0.20,
+            size: 300,
+          ),
+          _Glow(
+            alignment: Alignment(1.4, 0.5),
+            color: AppColors.cyan,
+            opacity: 0.15,
+            size: 300,
+          ),
+          _Glow(
+            alignment: Alignment.center,
+            color: AppColors.purple,
+            opacity: 0.30,
+            size: 380,
+          ),
         ],
         const RepaintBoundary(
           child: CustomPaint(painter: _StarfieldPainter(), size: Size.infinite),
@@ -74,7 +112,10 @@ class _Glow extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
-              colors: [color.withValues(alpha: opacity), color.withValues(alpha: 0)],
+              colors: [
+                color.withValues(alpha: opacity),
+                color.withValues(alpha: 0),
+              ],
             ),
           ),
         ),
@@ -94,11 +135,15 @@ class _StarfieldPainter extends CustomPainter {
 
     final starPaint = Paint();
     for (var i = 0; i < 45; i++) {
-      final p = Offset(rnd.nextDouble() * size.width, rnd.nextDouble() * size.height);
+      final p = Offset(
+        rnd.nextDouble() * size.width,
+        rnd.nextDouble() * size.height,
+      );
       points.add(p);
       final isCyan = i % 4 == 0;
-      starPaint.color = (isCyan ? AppColors.cyan : Colors.white)
-          .withValues(alpha: 0.3 + rnd.nextDouble() * 0.2);
+      starPaint.color = (isCyan ? AppColors.cyan : Colors.white).withValues(
+        alpha: 0.3 + rnd.nextDouble() * 0.2,
+      );
       canvas.drawCircle(p, 0.6 + rnd.nextDouble() * 1.2, starPaint);
     }
 
@@ -108,7 +153,8 @@ class _StarfieldPainter extends CustomPainter {
       ..strokeWidth = 0.6;
     for (var i = 0; i < points.length; i++) {
       for (var j = i + 1; j < points.length; j++) {
-        if ((points[i] - points[j]).distance < size.width * 0.28 && (i + j) % 5 == 0) {
+        if ((points[i] - points[j]).distance < size.width * 0.28 &&
+            (i + j) % 5 == 0) {
           canvas.drawLine(points[i], points[j], linePaint);
         }
       }

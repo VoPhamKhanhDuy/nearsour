@@ -79,7 +79,7 @@ void main() {
 
     await tester.tap(find.text('Danh bạ'));
     await _settle(tester);
-    expect(find.textContaining('Những người bạn đã gặp'), findsOneWidget);
+    expect(find.textContaining('Chưa có cuộc trò chuyện nào'), findsOneWidget);
     expect(find.text('Radar Discover'), findsNothing);
 
     await tester.tap(find.text('Cá nhân'));

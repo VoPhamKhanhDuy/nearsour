@@ -30,13 +30,17 @@ class GeolocatorLocationService implements LocationService {
 
   @override
   Future<LocationPermissionResult> checkPermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return LocationPermissionResult.serviceDisabled;
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return LocationPermissionResult.serviceDisabled;
+    }
     return _map(await Geolocator.checkPermission());
   }
 
   @override
   Future<LocationPermissionResult> requestPermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return LocationPermissionResult.serviceDisabled;
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return LocationPermissionResult.serviceDisabled;
+    }
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -54,8 +58,10 @@ class GeolocatorLocationService implements LocationService {
   }
 
   static LocationPermissionResult _map(LocationPermission p) => switch (p) {
-        LocationPermission.always || LocationPermission.whileInUse => LocationPermissionResult.granted,
-        LocationPermission.deniedForever => LocationPermissionResult.deniedForever,
-        LocationPermission.denied || LocationPermission.unableToDetermine => LocationPermissionResult.denied,
-      };
+    LocationPermission.always ||
+    LocationPermission.whileInUse => LocationPermissionResult.granted,
+    LocationPermission.deniedForever => LocationPermissionResult.deniedForever,
+    LocationPermission.denied ||
+    LocationPermission.unableToDetermine => LocationPermissionResult.denied,
+  };
 }

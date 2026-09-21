@@ -59,9 +59,9 @@ class _BrandBlock extends StatelessWidget {
         const NearSoulLogo(),
         const SizedBox(height: 16),
         ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [Color(0xFFE2E8F0), AppColors.cyan],
-          ).createShader(bounds),
+          shaderCallback: (bounds) =>
+              const LinearGradient(colors: [Color(0xFFE2E8F0), AppColors.cyan])
+                  .createShader(bounds),
           child: Text(
             'NEARSOUL',
             style: GoogleFonts.cinzel(

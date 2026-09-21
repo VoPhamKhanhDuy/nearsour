@@ -160,26 +160,111 @@ void main() {
     await _dispose(tester);
   });
 
-  testWidgets('connect sends a pending request, stops scanning, then opens Get Ready when accepted', (tester) async {
+  const noConnection = 'Không tìm thấy kết nối lúc này, tiếp tục quét...';
+
+  testWidgets('connect keeps the sheet open with a 30s countdown; accepted → Get Ready', (tester) async {
     await _openShell(tester);
     await _startAndFind(tester);
 
-    await _tapAndSettleSheet(tester, 'Gửi yêu cầu kết nối');
-    expect(MockUserStore.matches, hasLength(1));
-    expect(MockUserStore.matches.single.userB, 's1');
-    expect(MockUserStore.matches.single.status, MatchStatus.pending);
-    expect(find.textContaining('Đã gửi yêu cầu kết nối tới Mây Nhỏ'), findsOneWidget);
-    expect(find.text('Sẵn sàng kết nối'), findsOneWidget); // đã dừng quét
-    expect(MockUserStore.currentUser!.isScanning, isFalse);
+    await tester.tap(find.text('Gửi yêu cầu kết nối'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
-    // Đã dừng quét nên không tìm thêm người; sau khi người kia đồng ý (giả lập) cả hai vào Get Ready.
+    // Sheet ở lại, nút chuyển sang "Đang chờ phản hồi... 30s" và đếm lùi mỗi giây.
+    expect(find.text('Đang chờ phản hồi... 30s'), findsOneWidget);
+    expect(find.text('Gửi yêu cầu kết nối'), findsNothing);
+    final match = MockUserStore.matches.single;
+    expect(match.userB, 's1');
+    expect(match.status, MatchStatus.pending);
+    expect(match.requestExpiresAt!.difference(match.createdAt).inSeconds, 30);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Đang chờ phản hồi... 29s'), findsOneWidget);
+
+    // Mây Nhỏ (giả lập) đồng ý sau 3 giây → cả hai vào Get Ready.
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('TÌM THẤY 1 NGƯỜI PHÙ HỢP GẦN BẠN'), findsNothing);
     expect(find.text('Cả hai đã sẵn sàng'), findsOneWidget);
-    expect(MockUserStore.matches.single.status, MatchStatus.quiz);
+    expect(match.status, MatchStatus.quiz);
+    expect(MockUserStore.currentUser!.isScanning, isFalse);
     await _dispose(tester);
   });
+
+  testWidgets('while waiting the sheet cannot be dismissed or changed', (tester) async {
+    await _openShell(tester);
+    await _startAndFind(tester);
+    await tester.tap(find.text('Gửi yêu cầu kết nối'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.text('Bỏ qua'), warnIfMissed: false);
+    await tester.tap(find.text('Chặn ngay'), warnIfMissed: false);
+    await tester.tapAt(const Offset(20, 120)); // chạm nền mờ
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.textContaining('Đang chờ phản hồi'), findsOneWidget);
+    expect(MockUserStore.currentUser!.blockedUsers, isEmpty);
+    await _dispose(tester);
+  });
+
+  testWidgets('declined and ignored requests look exactly the same to the sender', (tester) async {
+    Future<void> reachAndSend(String nickname) async {
+      await _openShell(tester);
+      await _startAndFind(tester);
+      // Bỏ qua lần lượt cho tới khi tới đúng người cần thử.
+      while (find.text(nickname).evaluate().isEmpty) {
+        await _tapAndSettleSheet(tester, 'Bỏ qua');
+        await _waitForNextFind(tester);
+      }
+      await tester.tap(find.text('Gửi yêu cầu kết nối'));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    String visibleSnapshot() => [
+          find.text(noConnection).evaluate().isNotEmpty,
+          find.text('Dừng tìm kiếm').evaluate().isNotEmpty, // radar vẫn quét
+          find.text('TÌM THẤY 1 NGƯỜI PHÙ HỢP GẦN BẠN').evaluate().isNotEmpty, // sheet đã đóng
+          find.textContaining('từ chối').evaluate().isNotEmpty,
+          find.textContaining('Từ chối').evaluate().isNotEmpty,
+        ].toString();
+
+    // Nắng Mai từ chối sau 3 giây.
+    await reachAndSend('Nắng Mai');
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 500));
+    final declined = visibleSnapshot();
+    expect(MockUserStore.matches.last.status, MatchStatus.rejected);
+    await _dispose(tester);
+
+    // Gió Đông im lặng, yêu cầu tự hết hạn sau 30 giây.
+    await reachAndSend('Gió Đông');
+    await tester.pump(const Duration(seconds: 30));
+    await tester.pump(const Duration(milliseconds: 500));
+    final ignored = visibleSnapshot();
+    expect(MockUserStore.matches.last.status, MatchStatus.expired);
+    await _dispose(tester);
+
+    // Cả hai: sheet đóng, một dòng trung tính, radar vẫn quét, tuyệt đối không có chữ "từ chối".
+    expect(declined, '[true, true, false, false, false]');
+    expect(ignored, declined);
+  });
+
+  testWidgets('after a failed request the person is not shown again and the radar keeps looking', (tester) async {
+    await _openShell(tester);
+    await _startAndFind(tester);
+    await _tapAndSettleSheet(tester, 'Bỏ qua'); // Mây Nhỏ
+    await _waitForNextFind(tester);
+    expect(find.text('Nắng Mai'), findsOneWidget);
+    await tester.tap(find.text('Gửi yêu cầu kết nối'));
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 500)); // Nắng Mai từ chối
+
+    await _waitForNextFind(tester);
+    expect(find.text('Nắng Mai'), findsNothing);
+    expect(find.text('Gió Đông'), findsOneWidget);
+    await _dispose(tester);
+  });
+
 
   testWidgets('stopping before the find delay shows no sheet', (tester) async {
     await _openShell(tester);

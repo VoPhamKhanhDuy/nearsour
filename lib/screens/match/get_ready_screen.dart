@@ -9,7 +9,8 @@ import '../../widgets/avatar_image.dart';
 import '../../widgets/cosmic_background.dart';
 import '../../widgets/onboarding_header.dart';
 import '../../widgets/status_badge.dart';
-import '../quiz/quiz_placeholder_screen.dart';
+import '../../mock/mock_data.dart';
+import '../quiz/quiz_screen.dart';
 
 /// Get Ready: cả hai đã đồng ý kết nối, đếm ngược 3 → 2 → 1 → "Bắt đầu!" rồi tự vào AI Quiz.
 /// Không thoát được giữa chừng để hai bên vào Quiz cùng lúc.
@@ -33,11 +34,22 @@ class GetReadyScreen extends StatefulWidget {
   State<GetReadyScreen> createState() => _GetReadyScreenState();
 }
 
-class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProviderStateMixin {
+class _GetReadyScreenState extends State<GetReadyScreen>
+    with TickerProviderStateMixin {
   static const _start = 3;
 
-  // Chu kỳ 4s: sóng lan ra nền; các hiệu ứng nhanh hơn (2s) là bội của nó nên vòng lặp không bị giật.
-  late final AnimationController _anim = AnimationController(vsync: this, duration: const Duration(seconds: 4));
+  // Chu kỳ 4s cho hiệu ứng trang trí (sóng nền, hạt sáng chạy, vòng sáng ở tâm); các nhịp 2s là bội của nó.
+  late final AnimationController _anim = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 4),
+  );
+
+  // Vòng tiến trình quanh số đếm: chạy đều 0 → 1 trong đúng 3 nhịp. Đây là thông tin chứ không phải trang trí
+  // nên vẫn chạy khi hệ thống bật "giảm chuyển động".
+  late final AnimationController _progress = AnimationController(
+    vsync: this,
+    duration: widget.tick * _start,
+  );
 
   int _count = _start; // 0 = đã tới "Bắt đầu!"
   Timer? _tickTimer;
@@ -46,13 +58,14 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
+    _progress.forward();
     _tickTimer = Timer.periodic(widget.tick, _onTick);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Tôn trọng cài đặt "giảm chuyển động": dừng hiệu ứng, số đếm ngược vẫn chạy.
+    // Tôn trọng cài đặt "giảm chuyển động": dừng hiệu ứng trang trí, số đếm ngược vẫn chạy.
     if (MediaQuery.disableAnimationsOf(context)) {
       _anim.stop();
     } else if (!_anim.isAnimating) {
@@ -65,6 +78,7 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
     _tickTimer?.cancel();
     _holdTimer?.cancel();
     _anim.dispose();
+    _progress.dispose();
     super.dispose();
   }
 
@@ -72,15 +86,20 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
     setState(() => _count--);
     if (_count <= 0) {
       timer.cancel();
+      _progress.value = 1; // chắc chắn vòng đã đầy khi hiện "Bắt đầu!"
       _holdTimer = Timer(widget.startHold, _goToQuiz);
     }
   }
 
-  // TODO: thay bằng màn AI Quiz thật (5 câu hỏi) khi có thiết kế.
   void _goToQuiz() {
     if (!mounted) return;
+    // Cùng một match cho cả hai bên; chưa có thì tạo (ví dụ khi mở thẳng màn này).
+    final match = MockUserStore.quizMatchWith(widget.partner.id);
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => QuizPlaceholderScreen(partner: widget.partner)),
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            QuizScreen(match: match, me: widget.me, partner: widget.partner),
+      ),
     );
   }
 
@@ -94,36 +113,48 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
           child: Stack(
             children: [
               Positioned.fill(
-                child: RepaintBoundary(child: CustomPaint(painter: _RipplePainter(_anim))),
+                child: RepaintBoundary(
+                  child: CustomPaint(painter: _RipplePainter(_anim)),
+                ),
               ),
               SafeArea(
                 child: Column(
                   children: [
                     // Không có nút back: đang đồng bộ đếm ngược với người kia.
-                    const OnboardingHeader(trailing: StatusBadge(label: 'Đã kết nối', color: AppColors.cyan)),
+                    const OnboardingHeader(
+                      trailing: StatusBadge(
+                        label: 'Đã kết nối',
+                        color: AppColors.cyan,
+                      ),
+                    ),
                     Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _Stage(anim: _anim, count: _count, me: widget.me, partner: widget.partner),
-                              const SizedBox(height: 40),
-                              const Text(
-                                'Cả hai đã sẵn sàng',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Color(0xFFE6DEFF), fontSize: 28, fontWeight: FontWeight.w700),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Màn thấp thì thu nhỏ vòng đếm và khoảng cách để không phải cuộn.
+                          final compact = constraints.maxHeight < 520;
+                          return Center(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Chuẩn bị bắt đầu AI Quiz',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: const Color(0xFFCDC3D5).withValues(alpha: 0.85), fontSize: 16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _Stage(
+                                    anim: _anim,
+                                    progress: _progress,
+                                    count: _count,
+                                    me: widget.me,
+                                    partner: widget.partner,
+                                    compact: compact,
+                                  ),
+                                  SizedBox(height: compact ? 16 : 32),
+                                  const _Title(),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     Padding(
@@ -131,13 +162,21 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.lock, size: 14, color: Colors.white.withValues(alpha: 0.6)),
+                          Icon(
+                            Icons.lock,
+                            size: 14,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          ),
                           const SizedBox(width: 6),
                           Flexible(
                             child: Text(
                               'Đáp án của bạn sẽ được ẩn với đối phương.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, fontStyle: FontStyle.italic),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                           ),
                         ],
@@ -154,48 +193,100 @@ class _GetReadyScreenState extends State<GetReadyScreen> with SingleTickerProvid
   }
 }
 
-/// Hai avatar hai bên, vòng đếm ngược ở giữa, đường năng lượng nối từng avatar vào vòng.
-class _Stage extends StatelessWidget {
-  final Animation<double> anim;
-  final int count;
-  final AppUser me;
-  final AppUser partner;
-
-  const _Stage({required this.anim, required this.count, required this.me, required this.partner});
+/// Tiêu đề trắng đậm (gradient chỉ dành cho vòng đếm ngược); dòng phụ nhỏ và mờ hơn hẳn.
+class _Title extends StatelessWidget {
+  const _Title();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Màn hẹp (≤ 340px) thì avatar, nhãn và vòng đếm đều nhỏ lại để vẫn đủ chỗ cho đường nối.
-        final compact = constraints.maxWidth < 340;
-        final avatar = compact ? 56.0 : 64.0;
-        final labelWidth = compact ? 68.0 : 84.0;
-        final minLine = compact ? 12.0 : 16.0;
-        final circle = (constraints.maxWidth - 2 * labelWidth - 2 * minLine).clamp(100.0, 192.0);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Cả hai đã sẵn sàng',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 34,
+            height: 1.15,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Chuẩn bị bắt đầu AI Quiz',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: const Color(0xFFCDC3D5).withValues(alpha: 0.6),
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+/// Hai avatar ở trên, hai đường cong sáng chụm xuống vòng đếm ngược ở dưới ("hai người đang kết nối").
+class _Stage extends StatelessWidget {
+  final Animation<double> anim;
+  final Animation<double> progress;
+  final int count;
+  final AppUser me;
+  final AppUser partner;
+  final bool compact;
+
+  const _Stage({
+    required this.anim,
+    required this.progress,
+    required this.count,
+    required this.me,
+    required this.partner,
+    required this.compact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final avatar = compact ? 56.0 : 72.0;
+    const labelWidth = 92.0;
+    final connectorHeight = compact ? 44.0 : 72.0;
+    final circle = compact ? 150.0 : 200.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _Player(user: me, color: AppColors.magenta, avatar: avatar, width: labelWidth),
-            Expanded(child: _EnergyLine(anim: anim, leftToRight: true)),
-            _CountdownCircle(anim: anim, count: count, size: circle),
-            Expanded(child: _EnergyLine(anim: anim, leftToRight: false)),
-            _Player(user: partner, color: AppColors.cyan, avatar: avatar, width: labelWidth),
+            _Player(user: me, avatar: avatar, width: labelWidth),
+            _Player(user: partner, avatar: avatar, width: labelWidth),
           ],
-        );
-      },
+        ),
+        SizedBox(
+          key: const ValueKey('connector'),
+          width: double.infinity,
+          height: connectorHeight,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _ConnectorPainter(anim, labelWidth / 2),
+            ),
+          ),
+        ),
+        _CountdownCircle(progress: progress, count: count, size: circle),
+      ],
     );
   }
 }
 
 class _Player extends StatelessWidget {
   final AppUser user;
-  final Color color;
   final double avatar;
   final double width;
 
-  const _Player({required this.user, required this.color, required this.avatar, required this.width});
+  const _Player({
+    required this.user,
+    required this.avatar,
+    required this.width,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +302,16 @@ class _Player extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFF2B2546),
-              border: Border.all(color: color.withValues(alpha: 0.85), width: 2),
-              boxShadow: [BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 25)],
+              border: Border.all(
+                color: AppColors.cyan.withValues(alpha: 0.7),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.cyan.withValues(alpha: 0.3),
+                  blurRadius: 18,
+                ),
+              ],
             ),
             child: AvatarImage(avatarId: user.avatarId, size: avatar - 8),
           ),
@@ -222,7 +321,11 @@ class _Player extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFFE6DEFF), fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Color(0xFFE6DEFF),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -231,88 +334,85 @@ class _Player extends StatelessWidget {
 }
 
 class _CountdownCircle extends StatelessWidget {
-  final Animation<double> anim;
+  static const double _ringGap =
+      14; // khoảng từ viền vòng đếm tới vòng tiến trình
+
+  final Animation<double> progress;
   final int count;
   final double size;
 
-  const _CountdownCircle({required this.anim, required this.count, required this.size});
+  const _CountdownCircle({
+    required this.progress,
+    required this.count,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
     final started = count <= 0;
+    final outer = size + 2 * _ringGap;
 
     return Semantics(
       liveRegion: true,
       label: started ? 'Bắt đầu' : 'Bắt đầu sau $count giây',
       child: ExcludeSemantics(
-        child: AnimatedBuilder(
-          animation: anim,
-          builder: (context, child) {
-            final pulse = (anim.value * 2) % 1; // nhịp 2s: vòng sáng lan ra rồi tan
-            return Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xCC140E2E),
-                border: Border.all(color: AppColors.cyan.withValues(alpha: 0.85), width: 3),
-                boxShadow: [
-                  BoxShadow(color: AppColors.cyan.withValues(alpha: 0.35), blurRadius: 40),
-                  BoxShadow(
-                    color: AppColors.cyan.withValues(alpha: 0.4 * (1 - pulse)),
-                    blurRadius: 4,
-                    spreadRadius: 22 * pulse,
-                  ),
-                  BoxShadow(
-                    color: AppColors.magenta.withValues(alpha: 0.25 * (1 - pulse)),
-                    blurRadius: 4,
-                    spreadRadius: 36 * pulse,
-                  ),
-                ],
-              ),
-              child: child,
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.magenta.withValues(alpha: 0.4)),
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0x993A3556), Color(0x99201B3B)],
-              ),
-            ),
+        child: SizedBox(
+          width: outer,
+          height: outer,
+          child: Stack(
             alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(scale: Tween(begin: 0.6, end: 1.0).animate(animation), child: child),
+            children: [
+              // Vòng tiến trình chạy dần quanh viền theo thời gian (cùng một màu cyan với viền).
+              CustomPaint(
+                key: const ValueKey('countdown-ring'),
+                size: Size.square(outer),
+                painter: _RingPainter(progress),
               ),
-              child: FittedBox(
-                key: ValueKey(count),
-                fit: BoxFit.scaleDown,
-                child: ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [AppColors.cyan, Color(0xFFF1AFFF)],
-                  ).createShader(bounds),
-                  child: Text(
-                    started ? 'Bắt đầu!' : '$count',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: started ? 36 : 96,
-                      height: 1.05,
-                      fontWeight: FontWeight.w800,
+              // Một lớp viền cyan + một lớp glow cyan.
+              Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xCC140E2E),
+                  border: Border.all(
+                    color: AppColors.cyan.withValues(alpha: 0.85),
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.cyan.withValues(alpha: 0.3),
+                      blurRadius: 32,
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween(begin: 0.6, end: 1.0).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: FittedBox(
+                    key: ValueKey(count),
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      started ? 'Bắt đầu!' : '$count',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: started ? 34 : 88,
+                        height: 1.05,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -320,59 +420,118 @@ class _CountdownCircle extends StatelessWidget {
   }
 }
 
-/// Đường nối avatar ↔ vòng đếm: vạch gradient và vài hạt sáng chạy từ avatar vào vòng.
-class _EnergyLine extends StatelessWidget {
-  final Animation<double> anim;
-  final bool leftToRight;
+/// Vòng tiến trình mỏng: nền mờ + cung cyan chạy theo chiều kim đồng hồ từ đỉnh (một màu, một lớp glow cyan).
+class _RingPainter extends CustomPainter {
+  final Animation<double> progress;
 
-  const _EnergyLine({required this.anim, required this.leftToRight});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 24,
-      child: RepaintBoundary(child: CustomPaint(painter: _EnergyPainter(anim, leftToRight))),
-    );
-  }
-}
-
-class _EnergyPainter extends CustomPainter {
-  final Animation<double> anim;
-  final bool leftToRight;
-
-  _EnergyPainter(this.anim, this.leftToRight) : super(repaint: anim);
+  _RingPainter(this.progress) : super(repaint: progress);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final y = size.height / 2;
-    // Đầu gần avatar là magenta mờ, đầu gần vòng là cyan sáng.
-    final colors = leftToRight
-        ? [AppColors.magenta.withValues(alpha: 0), AppColors.magenta.withValues(alpha: 0.8), AppColors.cyan.withValues(alpha: 0.9)]
-        : [AppColors.cyan.withValues(alpha: 0.9), AppColors.magenta.withValues(alpha: 0.8), AppColors.magenta.withValues(alpha: 0)];
-    final line = Rect.fromLTWH(0, y - 1.5, size.width, 3);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(line, const Radius.circular(2)),
-      Paint()
-        ..shader = LinearGradient(colors: colors).createShader(line)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5),
-    );
+    const stroke = 4.0;
+    final arcRect = (Offset.zero & size).deflate(stroke / 2 + 1);
+    final sweep = progress.value.clamp(0.0, 1.0) * 2 * pi;
 
-    // Hạt sáng chạy hướng vào vòng đếm (chu kỳ 2s, hai hạt lệch pha)
-    for (var i = 0; i < 2; i++) {
-      final phase = (anim.value * 2 + i * 0.5) % 1;
-      final x = size.width * (leftToRight ? phase : 1 - phase);
-      canvas.drawCircle(
-        Offset(x, y),
-        4,
+    canvas.drawArc(
+      arcRect,
+      0,
+      2 * pi,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..color = Colors.white.withValues(alpha: 0.08),
+    );
+    if (sweep <= 0) return;
+
+    canvas.drawArc(
+      arcRect,
+      -pi / 2,
+      sweep,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke + 6
+        ..strokeCap = StrokeCap.round
+        ..color = AppColors.cyan.withValues(alpha: 0.35)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    canvas.drawArc(
+      arcRect,
+      -pi / 2,
+      sweep,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..color = AppColors.cyan,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) => false;
+}
+
+/// Hai đường cong mảnh một màu cyan từ tâm mỗi avatar chụm xuống đỉnh vòng đếm, kèm hạt sáng nhỏ chạy xuống.
+class _ConnectorPainter extends CustomPainter {
+  final Animation<double> anim;
+  final double sideInset; // khoảng từ mép tới tâm avatar
+
+  _ConnectorPainter(this.anim, this.sideInset) : super(repaint: anim);
+
+  static Path _curve(double fromX, double toX, double h) => Path()
+    ..moveTo(fromX, 0)
+    ..cubicTo(fromX, h * 0.65, toX, h * 0.35, toX, h);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final paths = [
+      _curve(sideInset, w / 2, h),
+      _curve(w - sideInset, w / 2, h),
+    ];
+
+    // Mờ ở đầu avatar, rõ dần khi chụm vào vòng đếm.
+    final shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        AppColors.cyan.withValues(alpha: 0.25),
+        AppColors.cyan.withValues(alpha: 0.6),
+      ],
+    ).createShader(Rect.fromLTWH(0, 0, w, h));
+
+    for (final path in paths) {
+      canvas.drawPath(
+        path,
         Paint()
-          ..color = AppColors.cyan.withValues(alpha: 0.8 * sin(phase * pi))
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..strokeCap = StrokeCap.round
+          ..shader = shader,
       );
+
+      // Hạt sáng chạy từ avatar xuống vòng đếm (chu kỳ 2s, hai hạt lệch pha)
+      final metric = path.computeMetrics().first;
+      for (var i = 0; i < 2; i++) {
+        final phase = (anim.value * 2 + i * 0.5) % 1;
+        final tangent = metric.getTangentForOffset(metric.length * phase);
+        if (tangent == null) continue;
+        canvas.drawCircle(
+          tangent.position,
+          2.5,
+          Paint()
+            ..color = AppColors.cyan.withValues(alpha: 0.75 * sin(phase * pi)),
+        );
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _EnergyPainter oldDelegate) => oldDelegate.leftToRight != leftToRight;
+  bool shouldRepaint(covariant _ConnectorPainter oldDelegate) =>
+      oldDelegate.sideInset != sideInset;
 }
 
 /// Ba vòng sóng mờ lan ra từ giữa màn hình, lệch pha nhau.
@@ -395,7 +554,7 @@ class _RipplePainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2
-          ..color = (i == 1 ? AppColors.lilac : AppColors.cyan).withValues(alpha: 0.28 * (1 - phase))
+          ..color = AppColors.cyan.withValues(alpha: 0.22 * (1 - phase))
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
       );
     }

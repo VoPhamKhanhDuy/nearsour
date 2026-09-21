@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nearsoul/mock/mock_data.dart';
+import 'package:nearsoul/models/match.dart';
 import 'package:nearsoul/models/user.dart';
 import 'package:nearsoul/screens/match/get_ready_screen.dart';
 import 'package:nearsoul/theme/app_theme.dart';
@@ -100,7 +101,7 @@ void main() {
     await _elapse(tester, 500); // hết thời gian giữ → tự vào Quiz
     await _elapse(tester, 400);
     expect(find.text('AI Quiz'), findsOneWidget);
-    expect(find.textContaining('Mây Nhỏ'), findsOneWidget);
+    expect(find.text('Câu 1/5'), findsOneWidget);
     await _dispose(tester);
   });
 
@@ -113,6 +114,57 @@ void main() {
     expect(find.text('mở'), findsNothing); // vẫn ở Get Ready, không quay về trang gốc
     expect(find.text('Cả hai đã sẵn sàng'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_back), findsNothing);
+    await _dispose(tester);
+  });
+
+  testWidgets('layout: avatars above, connector lines into the circle, big title below, content fills the screen', (tester) async {
+    await _open(tester);
+
+    final avatarBottom = tester.getBottomLeft(find.text(_me.nickname!)).dy;
+    final connector = tester.getRect(find.byKey(const ValueKey('connector')));
+    final ring = tester.getRect(find.byKey(const ValueKey('countdown-ring')));
+    final title = tester.getRect(find.text('Cả hai đã sẵn sàng'));
+    final subtitle = tester.getRect(find.text('Chuẩn bị bắt đầu AI Quiz'));
+
+    // Thứ tự dọc: avatar → đường nối (đủ dài để nhìn thấy) → vòng đếm → tiêu đề → dòng phụ.
+    expect(avatarBottom <= connector.top + 1, isTrue);
+    expect(connector.height >= 60, isTrue);
+    expect(connector.bottom <= ring.top + 16, isTrue); // đường nối chụm vào đỉnh vòng đếm
+    expect(ring.bottom < title.top, isTrue);
+    expect(title.bottom < subtitle.top, isTrue);
+
+    // Nội dung trải rộng theo chiều dọc thay vì dồn một cụm nhỏ ở giữa (màn 900px).
+    final span = subtitle.bottom - tester.getTopLeft(find.text(_me.nickname!)).dy;
+    expect(span > 420, isTrue, reason: 'nội dung chỉ cao $span');
+
+    // Tiêu đề to hơn hẳn dòng phụ.
+    final titleStyle = tester.widget<Text>(find.text('Cả hai đã sẵn sàng')).style!;
+    final subtitleStyle = tester.widget<Text>(find.text('Chuẩn bị bắt đầu AI Quiz')).style!;
+    expect(titleStyle.fontSize! >= 32, isTrue);
+    expect(titleStyle.fontSize! > subtitleStyle.fontSize! * 2, isTrue);
+    // Gradient chỉ dành cho vòng đếm ngược; tiêu đề là chữ trắng đậm đơn giản.
+    expect(titleStyle.color, Colors.white);
+    expect(titleStyle.fontWeight!.value >= FontWeight.w700.value, isTrue);
+    expect(find.ancestor(of: find.text('Cả hai đã sẵn sàng'), matching: find.byType(ShaderMask)), findsNothing);
+    await _dispose(tester);
+  });
+
+  testWidgets('progress ring fills steadily over the three ticks', (tester) async {
+    await _open(tester);
+    double progress() {
+      final painter = tester.widget<CustomPaint>(find.byKey(const ValueKey('countdown-ring'))).painter as dynamic;
+      return painter.progress.value as double;
+    }
+
+    // Ở thời điểm mở màn (đã trôi 400ms do chờ route trượt vào): mới đầy khoảng 13%.
+    expect(progress(), inInclusiveRange(0.05, 0.2));
+
+    await _elapse(tester, 1100); // ≈ 1.5s
+    expect(progress(), inInclusiveRange(0.45, 0.55));
+
+    await _elapse(tester, 1600); // ≈ 3.1s: đã đếm xong
+    expect(progress(), 1.0);
+    expect(find.text('Bắt đầu!'), findsOneWidget);
     await _dispose(tester);
   });
 
@@ -139,17 +191,17 @@ void main() {
     await _dispose(tester);
   });
 
-  testWidgets('quiz placeholder returns to the Radar tab', (tester) async {
+  testWidgets('hands over to the AI Quiz with one match in the quiz stage', (tester) async {
+    MockUserStore.matches.clear();
     await _open(tester);
     await _elapse(tester, 3000);
     await _elapse(tester, 1000);
     await _elapse(tester, 400);
-    expect(find.text('AI Quiz'), findsOneWidget);
 
-    await tester.tap(find.text('Về Radar'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Radar Discover'), findsOneWidget);
+    expect(find.text('AI Quiz'), findsOneWidget);
+    expect(find.text('Câu 1/5'), findsOneWidget);
+    expect(MockUserStore.matches.single.status, MatchStatus.quiz);
+    expect(MockUserStore.matches.single.userB, _partner.id);
     await _dispose(tester);
   });
 }

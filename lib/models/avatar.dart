@@ -16,6 +16,8 @@ const avatarKeys = [
 
 /// Đường dẫn ảnh của avatar, hoặc null nếu id không hợp lệ.
 String? avatarAsset(int? avatarId) {
-  if (avatarId == null || avatarId < 1 || avatarId > avatarKeys.length) return null;
+  if (avatarId == null || avatarId < 1 || avatarId > avatarKeys.length) {
+    return null;
+  }
   return 'assets/images/${avatarKeys[avatarId - 1]}.png';
 }

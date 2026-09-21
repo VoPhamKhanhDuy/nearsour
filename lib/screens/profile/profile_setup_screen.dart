@@ -20,7 +20,11 @@ class ProfileSetupScreen extends StatefulWidget {
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   static const _minAge = 18;
-  static const _genders = [('male', 'Nam'), ('female', 'Nữ'), ('other', 'Khác')];
+  static const _genders = [
+    ('male', 'Nam'),
+    ('female', 'Nữ'),
+    ('other', 'Khác'),
+  ];
 
   final _nicknameCtrl = TextEditingController();
 
@@ -66,7 +70,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         _genderError = 'Vui lòng chọn giới tính';
       }
     });
-    if (_nicknameError != null || _birthYearError != null || _genderError != null) return;
+    if (_nicknameError != null ||
+        _birthYearError != null ||
+        _genderError != null) {
+      return;
+    }
 
     MockUserStore.updateProfile(
       nickname: _nicknameCtrl.text,
@@ -75,7 +83,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       avatarId: _avatarId,
     );
     // Không xoá màn hồ sơ khỏi stack để người dùng có thể quay lại chỉnh sửa.
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GpsIntroScreen()));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const GpsIntroScreen()));
   }
 
   @override
@@ -87,7 +96,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           child: Column(
             children: [
               OnboardingHeader(
-                onBack: Navigator.of(context).canPop() ? () => Navigator.of(context).pop() : null,
+                onBack: Navigator.of(context).canPop()
+                    ? () => Navigator.of(context).pop()
+                    : null,
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -109,7 +120,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         controller: _nicknameCtrl,
                         hasError: _nicknameError != null,
                         onChanged: (_) {
-                          if (_nicknameError != null) setState(() => _nicknameError = null);
+                          if (_nicknameError != null) {
+                            setState(() => _nicknameError = null);
+                          }
                         },
                         onSubmitted: (_) => _submit(),
                       ),
@@ -143,7 +156,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       Center(
                         child: Text(
                           'Bạn có thể thay đổi sau trong Cài đặt',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 11),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ],
@@ -172,7 +188,12 @@ class _Title extends StatelessWidget {
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            shadows: [Shadow(color: AppColors.magenta.withValues(alpha: 0.4), blurRadius: 20)],
+            shadows: [
+              Shadow(
+                color: AppColors.magenta.withValues(alpha: 0.4),
+                blurRadius: 20,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 4),
@@ -183,7 +204,11 @@ class _Title extends StatelessWidget {
             Flexible(
               child: Text(
                 'Thông tin này sẽ được ẩn danh hoàn toàn',
-                style: TextStyle(color: Color(0xFFB0A8D0), fontSize: 12, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: Color(0xFFB0A8D0),
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           ],
@@ -212,7 +237,13 @@ class _AvatarPicker extends StatelessWidget {
         color: AppColors.fieldBg,
         borderRadius: BorderRadius.circular(32),
         border: Border.all(color: const Color(0xB37B3FCC), width: 1.5),
-        boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 4))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 24,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,15 +252,24 @@ class _AvatarPicker extends StatelessWidget {
             padding: EdgeInsets.only(left: 8),
             child: Text(
               'CHỌN AVATAR',
-              style: TextStyle(color: AppColors.magenta, fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: AppColors.magenta,
+                fontSize: 11,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           const SizedBox(height: 14),
           LayoutBuilder(
             builder: (context, constraints) {
               // Avatar 72px (máy hẹp thì co lại). Khoảng cách ngang = dọc để lưới đều và nằm giữa thẻ.
-              final tile = ((constraints.maxWidth - (_columns + 1) * _minGap) / _columns).clamp(0.0, _maxTile);
-              final gap = ((constraints.maxWidth - _columns * tile) / (_columns + 1)).clamp(_minGap, _maxGap);
+              final tile =
+                  ((constraints.maxWidth - (_columns + 1) * _minGap) / _columns)
+                      .clamp(0.0, _maxTile);
+              final gap =
+                  ((constraints.maxWidth - _columns * tile) / (_columns + 1))
+                      .clamp(_minGap, _maxGap);
               final rows = (avatarKeys.length / _columns).ceil();
               return Column(
                 children: [
@@ -295,7 +335,12 @@ class _AvatarTile extends StatelessWidget {
                     width: selected ? 2.5 : 1,
                   ),
                   boxShadow: selected
-                      ? [BoxShadow(color: AppColors.cyan.withValues(alpha: 0.6), blurRadius: 15)]
+                      ? [
+                          BoxShadow(
+                            color: AppColors.cyan.withValues(alpha: 0.6),
+                            blurRadius: 15,
+                          ),
+                        ]
                       : null,
                 ),
                 child: AvatarImage(avatarId: id, size: size),
@@ -334,7 +379,11 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -350,7 +399,10 @@ class _FieldError extends StatelessWidget {
     if (message == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(left: 4, top: 6),
-      child: Text(message!, style: const TextStyle(color: AppColors.error, fontSize: 12.5)),
+      child: Text(
+        message!,
+        style: const TextStyle(color: AppColors.error, fontSize: 12.5),
+      ),
     );
   }
 }
@@ -361,15 +413,19 @@ class _FieldShell extends StatelessWidget {
   final bool focused;
   final bool hasError;
 
-  const _FieldShell({required this.child, this.focused = false, this.hasError = false});
+  const _FieldShell({
+    required this.child,
+    this.focused = false,
+    this.hasError = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final borderColor = hasError
         ? AppColors.error
         : focused
-            ? AppColors.magenta
-            : AppColors.magenta.withValues(alpha: 0.45);
+        ? AppColors.magenta
+        : AppColors.magenta.withValues(alpha: 0.45);
     return Container(
       height: 56,
       decoration: BoxDecoration(
@@ -377,7 +433,12 @@ class _FieldShell extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor, width: 1.5),
         boxShadow: focused && !hasError
-            ? [BoxShadow(color: AppColors.magenta.withValues(alpha: 0.4), blurRadius: 10)]
+            ? [
+                BoxShadow(
+                  color: AppColors.magenta.withValues(alpha: 0.4),
+                  blurRadius: 10,
+                ),
+              ]
             : null,
       ),
       child: ClipRRect(
@@ -395,7 +456,9 @@ class _FieldShell extends StatelessWidget {
               top: 0,
               bottom: 0,
               width: 2,
-              child: ColoredBox(color: hasError ? AppColors.error : AppColors.magenta),
+              child: ColoredBox(
+                color: hasError ? AppColors.error : AppColors.magenta,
+              ),
             ),
           ],
         ),
@@ -460,7 +523,9 @@ class _NicknameFieldState extends State<_NicknameField> {
                 counterText: '',
                 isCollapsed: true,
                 hintText: 'Nhập biệt danh của bạn...',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
               ),
             ),
           ),
@@ -489,7 +554,11 @@ class _BirthYearField extends StatelessWidget {
       hasError: hasError,
       child: Row(
         children: [
-          const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF9B7FE8)),
+          const Icon(
+            Icons.calendar_today_outlined,
+            size: 18,
+            color: Color(0xFF9B7FE8),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonHideUnderline(
@@ -499,14 +568,21 @@ class _BirthYearField extends StatelessWidget {
                 menuMaxHeight: 320,
                 dropdownColor: const Color(0xFF201B3B),
                 borderRadius: BorderRadius.circular(14),
-                icon: Icon(Icons.expand_more, color: Colors.white.withValues(alpha: 0.4)),
+                icon: Icon(
+                  Icons.expand_more,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
                 style: const TextStyle(color: Colors.white, fontSize: 15),
                 hint: Text(
                   'Chọn năm sinh',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 15),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    fontSize: 15,
+                  ),
                 ),
                 items: [
-                  for (final y in years) DropdownMenuItem(value: y, child: Text('$y')),
+                  for (final y in years)
+                    DropdownMenuItem(value: y, child: Text('$y')),
                 ],
                 onChanged: onChanged,
               ),
@@ -523,7 +599,11 @@ class _GenderSelector extends StatelessWidget {
   final String? value;
   final ValueChanged<String> onChanged;
 
-  const _GenderSelector({required this.options, required this.value, required this.onChanged});
+  const _GenderSelector({
+    required this.options,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -549,7 +629,11 @@ class _GenderPill extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _GenderPill({required this.label, required this.selected, required this.onTap});
+  const _GenderPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -561,15 +645,21 @@ class _GenderPill extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(23),
           gradient: selected
-              ? const LinearGradient(colors: [Color(0xFF7B3FCC), AppColors.magenta])
+              ? const LinearGradient(
+                  colors: [Color(0xFF7B3FCC), AppColors.magenta],
+                )
               : null,
           color: selected ? null : Colors.white.withValues(alpha: 0.05),
-          border: selected ? null : Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          border: selected
+              ? null
+              : Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.white.withValues(alpha: 0.55),
+            color: selected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.55),
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),

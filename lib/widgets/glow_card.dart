@@ -25,7 +25,10 @@ class GlowCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: AppColors.magenta.withValues(alpha: 0.4)),
         boxShadow: [
-          BoxShadow(color: AppColors.magenta.withValues(alpha: 0.18), blurRadius: 24),
+          BoxShadow(
+            color: AppColors.magenta.withValues(alpha: 0.18),
+            blurRadius: 24,
+          ),
         ],
       ),
       child: child,

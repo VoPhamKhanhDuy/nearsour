@@ -30,10 +30,16 @@ class GlassPillButton extends StatelessWidget {
     final danger = tone == GlassPillTone.danger;
     final color = danger ? AppColors.error : Colors.white;
 
-    return Material(
-      color: danger ? AppColors.error.withValues(alpha: 0.08) : const Color(0xFF363051).withValues(alpha: 0.5),
+    final button = Material(
+      color: danger
+          ? AppColors.error.withValues(alpha: 0.08)
+          : const Color(0xFF363051).withValues(alpha: 0.5),
       shape: StadiumBorder(
-        side: BorderSide(color: danger ? AppColors.error.withValues(alpha: 0.45) : AppColors.lilac.withValues(alpha: 0.25)),
+        side: BorderSide(
+          color: danger
+              ? AppColors.error.withValues(alpha: 0.45)
+              : AppColors.lilac.withValues(alpha: 0.25),
+        ),
       ),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -49,7 +55,11 @@ class GlassPillButton extends StatelessWidget {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -57,5 +67,6 @@ class GlassPillButton extends StatelessWidget {
         ),
       ),
     );
+    return onPressed == null ? Opacity(opacity: 0.4, child: button) : button;
   }
 }

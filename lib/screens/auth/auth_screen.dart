@@ -95,7 +95,9 @@ class _AuthScreenState extends State<AuthScreen> {
       if (emailErr != null) return (AuthField.email, emailErr);
       final passwordErr = Validators.password(password);
       if (passwordErr != null) return (AuthField.password, passwordErr);
-      if (_confirmCtrl.text.isEmpty) return (AuthField.confirm, 'Vui lòng xác nhận mật khẩu');
+      if (_confirmCtrl.text.isEmpty) {
+        return (AuthField.confirm, 'Vui lòng xác nhận mật khẩu');
+      }
       if (_confirmCtrl.text != password) {
         return (AuthField.confirm, 'Mật khẩu xác nhận không khớp');
       }
@@ -147,7 +149,9 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       final email = _emailCtrl.text;
       final password = _passwordCtrl.text;
-      _isRegister ? MockUserStore.register(email, password) : MockUserStore.login(email, password);
+      _isRegister
+          ? MockUserStore.register(email, password)
+          : MockUserStore.login(email, password);
     } on AuthException catch (e) {
       setState(() {
         _loading = false;
@@ -160,7 +164,9 @@ class _AuthScreenState extends State<AuthScreen> {
     final hasProfile = MockUserStore.currentUser?.nickname != null;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(
-        builder: (_) => hasProfile ? const RadarPermissionScreen() : const ProfileSetupScreen(),
+        builder: (_) => hasProfile
+            ? const RadarPermissionScreen()
+            : const ProfileSetupScreen(),
       ),
       (_) => false,
     );
@@ -194,12 +200,20 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 600),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        24 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF19173A),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
         border: Border(
-          top: BorderSide(color: AppColors.textPrimary.withValues(alpha: 0.35), width: 1.5),
+          top: BorderSide(
+            color: AppColors.textPrimary.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
         ),
         boxShadow: [
           BoxShadow(
@@ -245,7 +259,11 @@ class _Header extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: IconButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 28),
+              icon: const Icon(
+                Icons.arrow_back,
+                color: AppColors.textPrimary,
+                size: 28,
+              ),
             ),
           ),
           const NearSoulLogo(size: 65),
@@ -319,7 +337,11 @@ class _AuthForm extends StatelessWidget {
         Text(
           isRegister ? 'Tạo tài khoản' : 'Đăng nhập',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 24),
         _GoogleButton(onPressed: onGoogle),
@@ -363,7 +385,9 @@ class _AuthForm extends StatelessWidget {
           errorText: passwordError,
           icon: Icons.lock_outline,
           isPassword: true,
-          textInputAction: isRegister ? TextInputAction.next : TextInputAction.done,
+          textInputAction: isRegister
+              ? TextInputAction.next
+              : TextInputAction.done,
           onChanged: onPasswordChanged,
           onBlur: onPasswordBlur,
           onSubmitted: isRegister ? null : (_) => onSubmit(),
@@ -387,7 +411,10 @@ class _AuthForm extends StatelessWidget {
             child: TextButton(
               onPressed: onForgotPassword,
               style: TextButton.styleFrom(foregroundColor: AppColors.cyan),
-              child: const Text('Quên mật khẩu?', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text(
+                'Quên mật khẩu?',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         const SizedBox(height: 16),
@@ -405,8 +432,13 @@ class _AuthForm extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text.rich(
                 TextSpan(
-                  text: isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? ',
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                  text: isRegister
+                      ? 'Đã có tài khoản? '
+                      : 'Chưa có tài khoản? ',
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 15,
+                  ),
                   children: [
                     TextSpan(
                       text: isRegister ? 'Đăng nhập' : 'Đăng ký',
@@ -425,7 +457,11 @@ class _AuthForm extends StatelessWidget {
         Text(
           'Bằng việc tiếp tục, bạn đồng ý với Điều khoản và Chính sách bảo mật của NearSoul.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, height: 1.4),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+            height: 1.4,
+          ),
         ),
       ],
     );
@@ -454,9 +490,15 @@ class _GoogleButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(
+                'G',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
               SizedBox(width: 12),
-              Text('Tiếp tục với Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              Text(
+                'Tiếp tục với Google',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ],
           ),
         ),

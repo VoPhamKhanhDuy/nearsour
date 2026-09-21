@@ -15,8 +15,14 @@ class Match {
   final String userB;
   MatchStatus status;
   Map<String, List<int>> quizAnswers; // { userId: [answerIndex, ...] }
+  Map<String, List<String>>
+  freeTextAnswers; // câu tự luận: chỉ hiện cho nhau sau khi match thành công
+  List<String> freeTextQuestions; // nội dung các câu tự luận đó, để làm chủ đề mở lời trong chat
   int quizScore;
+  DateTime? requestExpiresAt; // now + 30s khi status chuyển sang pending
   DateTime? chatExpiresAt; // now + 48h khi vào trạng thái chatting
+  String? meetRequestedBy; // ai đã bấm "Gặp nhau ngoài đời" (đề nghị hai chiều, chờ người kia xác nhận)
+  DateTime? hiddenUntil; // không khớp Quiz: hai người ẩn khỏi radar của nhau tới lúc này (now + 24h)
   DateTime createdAt;
 
   Match({
@@ -25,9 +31,16 @@ class Match {
     required this.userB,
     this.status = MatchStatus.pending,
     Map<String, List<int>>? quizAnswers,
+    Map<String, List<String>>? freeTextAnswers,
+    List<String>? freeTextQuestions,
     this.quizScore = 0,
+    this.requestExpiresAt,
     this.chatExpiresAt,
+    this.meetRequestedBy,
+    this.hiddenUntil,
     DateTime? createdAt,
-  })  : quizAnswers = quizAnswers ?? {},
-        createdAt = createdAt ?? DateTime.now();
+  }) : quizAnswers = quizAnswers ?? {},
+       freeTextAnswers = freeTextAnswers ?? {},
+       freeTextQuestions = freeTextQuestions ?? [],
+       createdAt = createdAt ?? DateTime.now();
 }

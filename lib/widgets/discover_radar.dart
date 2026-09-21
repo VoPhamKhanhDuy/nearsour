@@ -13,17 +13,25 @@ class DiscoverRadar extends StatefulWidget {
   final bool scanning;
   final int? avatarId;
 
-  const DiscoverRadar({super.key, required this.scanning, required this.avatarId});
+  const DiscoverRadar({
+    super.key,
+    required this.scanning,
+    required this.avatarId,
+  });
 
   @override
   State<DiscoverRadar> createState() => _DiscoverRadarState();
 }
 
-class _DiscoverRadarState extends State<DiscoverRadar> with SingleTickerProviderStateMixin {
+class _DiscoverRadarState extends State<DiscoverRadar>
+    with SingleTickerProviderStateMixin {
   // 60s chia hết cho cả chu kỳ quét (6s / 2.5s) và chu kỳ nhấp nháy (2s) nên vòng lặp không bị giật.
   static const _loop = Duration(seconds: 60);
 
-  late final AnimationController _controller = AnimationController(vsync: this, duration: _loop);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: _loop,
+  );
 
   @override
   void didChangeDependencies() {
@@ -45,7 +53,9 @@ class _DiscoverRadarState extends State<DiscoverRadar> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: widget.scanning ? 'Radar đang quét người gần bạn' : 'Radar đang chờ kích hoạt',
+      label: widget.scanning
+          ? 'Radar đang quét người gần bạn'
+          : 'Radar đang chờ kích hoạt',
       child: SizedBox(
         width: DiscoverRadar.size,
         height: DiscoverRadar.size,
@@ -55,7 +65,9 @@ class _DiscoverRadarState extends State<DiscoverRadar> with SingleTickerProvider
           children: [
             Positioned.fill(
               child: RepaintBoundary(
-                child: CustomPaint(painter: _DiscoverPainter(_controller, widget.scanning)),
+                child: CustomPaint(
+                  painter: _DiscoverPainter(_controller, widget.scanning),
+                ),
               ),
             ),
             Container(
@@ -66,13 +78,25 @@ class _DiscoverRadarState extends State<DiscoverRadar> with SingleTickerProvider
                 shape: BoxShape.circle,
                 color: const Color(0xFF363051),
                 border: Border.all(color: AppColors.lilac, width: 2),
-                boxShadow: [BoxShadow(color: AppColors.lilac.withValues(alpha: 0.5), blurRadius: 24)],
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lilac.withValues(alpha: 0.5),
+                    blurRadius: 24,
+                  ),
+                ],
               ),
               child: AvatarImage(avatarId: widget.avatarId, size: 54),
             ),
             const Positioned(
               bottom: 100,
-              child: Text('Bạn', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+              child: Text(
+                'Bạn',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         ),
@@ -148,7 +172,9 @@ class _DiscoverPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5
-        ..color = (scanning ? AppColors.cyan : AppColors.lilac).withValues(alpha: (scanning ? 0.5 : 0.45) * (1 - pulse)),
+        ..color = (scanning ? AppColors.cyan : AppColors.lilac).withValues(
+          alpha: (scanning ? 0.5 : 0.45) * (1 - pulse),
+        ),
     );
 
     // Các chấm người xung quanh, nhấp nháy lệch pha
@@ -165,11 +191,23 @@ class _DiscoverPainter extends CustomPainter {
           ..color = color.withValues(alpha: 0.45 * (0.5 + 0.5 * wave))
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
       );
-      canvas.drawCircle(p, radius * scale, Paint()..color = color.withValues(alpha: 0.6 + 0.4 * wave));
+      canvas.drawCircle(
+        p,
+        radius * scale,
+        Paint()..color = color.withValues(alpha: 0.6 + 0.4 * wave),
+      );
     }
   }
 
-  void _ring(Canvas canvas, Offset c, double radius, Color color, double alpha, double width, {required double glow}) {
+  void _ring(
+    Canvas canvas,
+    Offset c,
+    double radius,
+    Color color,
+    double alpha,
+    double width, {
+    required double glow,
+  }) {
     canvas.drawCircle(
       c,
       radius,
@@ -190,5 +228,6 @@ class _DiscoverPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DiscoverPainter oldDelegate) => oldDelegate.scanning != scanning;
+  bool shouldRepaint(covariant _DiscoverPainter oldDelegate) =>
+      oldDelegate.scanning != scanning;
 }

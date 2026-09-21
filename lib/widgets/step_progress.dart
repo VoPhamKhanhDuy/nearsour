@@ -25,8 +25,15 @@ class StepProgress extends StatelessWidget {
                 widthFactor: step / total,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [AppColors.magenta, AppColors.cyan]),
-                    boxShadow: [BoxShadow(color: AppColors.cyan.withValues(alpha: 0.5), blurRadius: 10)],
+                    gradient: const LinearGradient(
+                      colors: [AppColors.magenta, AppColors.cyan],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.cyan.withValues(alpha: 0.5),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -36,7 +43,11 @@ class StepProgress extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           'Bước $step / $total',
-          style: const TextStyle(color: AppColors.magenta, fontSize: 12, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: AppColors.magenta,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

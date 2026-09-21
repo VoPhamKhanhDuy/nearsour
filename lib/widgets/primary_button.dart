@@ -13,6 +13,9 @@ class PrimaryButton extends StatelessWidget {
   /// Icon đứng trước chữ (tuỳ chọn).
   final IconData? icon;
 
+  /// Khi nút bị vô hiệu (onPressed = null): giảm độ đậm cả nút xuống ~50% thay vì đổi sang xám phẳng.
+  final bool dimWhenDisabled;
+
   /// Thay gradient tím → cyan mặc định, ví dụ màu xanh lá cho trạng thái thành công.
   final Gradient? gradient;
 
@@ -24,6 +27,7 @@ class PrimaryButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.gradient,
+    this.dimWhenDisabled = false,
   });
 
   bool get _isGradient => style == PrimaryButtonStyle.gradient;
@@ -32,7 +36,7 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !loading;
 
-    return Container(
+    final button = Container(
       height: 56,
       width: double.infinity,
       decoration: BoxDecoration(
@@ -95,5 +99,8 @@ class PrimaryButton extends StatelessWidget {
         ),
       ),
     );
+    return dimWhenDisabled && onPressed == null
+        ? Opacity(opacity: 0.5, child: button)
+        : button;
   }
 }

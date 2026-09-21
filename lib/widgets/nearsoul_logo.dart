@@ -37,7 +37,10 @@ class NearSoulLogo extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.cyan, width: 1),
               boxShadow: [
-                BoxShadow(color: AppColors.cyan.withValues(alpha: 0.6), blurRadius: size * 0.21),
+                BoxShadow(
+                  color: AppColors.cyan.withValues(alpha: 0.6),
+                  blurRadius: size * 0.21,
+                ),
               ],
             ),
             child: ClipOval(

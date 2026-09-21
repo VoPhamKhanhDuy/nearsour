@@ -22,7 +22,8 @@ class GpsIntroScreen extends StatelessWidget {
   }
 
   void _next(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Intro48hScreen()));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const Intro48hScreen()));
   }
 
   @override
@@ -34,7 +35,9 @@ class GpsIntroScreen extends StatelessWidget {
           child: Column(
             children: [
               OnboardingHeader(
-                onBack: Navigator.of(context).canPop() ? () => Navigator.of(context).pop() : null,
+                onBack: Navigator.of(context).canPop()
+                    ? () => Navigator.of(context).pop()
+                    : null,
                 actionLabel: 'Bỏ qua',
                 onAction: () => _skip(context),
               ),
@@ -63,12 +66,18 @@ class GpsIntroScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: PrimaryButton(label: 'Tiếp theo →', onPressed: () => _next(context)),
+                child: PrimaryButton(
+                  label: 'Tiếp theo →',
+                  onPressed: () => _next(context),
+                ),
               ),
               const SizedBox(height: 10),
               Text(
                 'Bạn có thể bỏ qua phần này',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  fontSize: 11,
+                ),
               ),
               const SizedBox(height: 16),
             ],
@@ -96,14 +105,22 @@ class _Intro extends StatelessWidget {
           child: const Text(
             'Kết nối với người gần bạn',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         const SizedBox(height: 8),
         const Text(
           'NearSoul phát hiện những người đang ở trong bán kính 200m — cùng không gian, cùng thời điểm, hoàn toàn ẩn danh.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFFC8C0E8), fontSize: 13.5, height: 1.5),
+          style: TextStyle(
+            color: Color(0xFFC8C0E8),
+            fontSize: 13.5,
+            height: 1.5,
+          ),
         ),
       ],
     );
@@ -141,7 +158,10 @@ class _FeaturePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xCC2A1870),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.magenta.withValues(alpha: 0.6), width: 1.5),
+        border: Border.all(
+          color: AppColors.magenta.withValues(alpha: 0.6),
+          width: 1.5,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
