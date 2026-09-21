@@ -187,7 +187,7 @@ void main() {
 
       await _submitRegister(tester);
       expect(find.text('Mật khẩu xác nhận không khớp'), findsOneWidget);
-      expect(find.text('Đăng nhập thành công'), findsNothing);
+      expect(find.text('Tạo hồ sơ của bạn'), findsNothing);
     });
 
     testWidgets('success goes to profile setup; duplicate email is rejected', (tester) async {

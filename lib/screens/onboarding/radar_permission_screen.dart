@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../services/location_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/cosmic_background.dart';
+import '../../widgets/glow_card.dart';
 import '../../widgets/onboarding_header.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/pulse_radar.dart';
-import '../home/home_placeholder_screen.dart';
+import '../main/main_shell.dart';
 
 /// Trang kích hoạt Radar: xin quyền vị trí (bắt buộc để radar tính bán kính 200m).
 /// Không thuộc 3 bước tạo hồ sơ; hiện ra sau khi tạo hồ sơ xong hoặc sau khi đăng nhập.
@@ -101,10 +102,10 @@ class _RadarPermissionScreenState extends State<RadarPermissionScreen> with Widg
     });
   }
 
-  // TODO: chuyển sang Radar Discover khi làm màn đó; hiện tạm về Home.
+  // Vào khung chính của app (tab Radar).
   void _finish() {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const HomePlaceholderScreen()),
+      MaterialPageRoute<void>(builder: (_) => const MainShell()),
       (_) => false,
     );
   }
@@ -274,15 +275,8 @@ class _PrivacyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.fieldBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.magenta.withValues(alpha: 0.4)),
-      ),
-      child: const Column(
+    return const GlowCard(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PrivacyRow(icon: Icons.lock_outline, text: 'Bảo mật tuyệt đối'),

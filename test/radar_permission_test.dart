@@ -74,7 +74,7 @@ void main() {
 
     await _pumpFor(tester);
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Đăng nhập thành công'), findsOneWidget);
+    expect(find.text('Radar Discover'), findsOneWidget);
     expect(service.requests, 0); // không hỏi lại
   });
 
@@ -89,7 +89,7 @@ void main() {
 
     await _pumpFor(tester);
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Đăng nhập thành công'), findsOneWidget);
+    expect(find.text('Radar Discover'), findsOneWidget);
     expect(service.requests, 1);
   });
 
@@ -105,7 +105,7 @@ void main() {
     await tester.tap(_activate);
     await _pumpFor(tester);
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Đăng nhập thành công'), findsOneWidget);
+    expect(find.text('Radar Discover'), findsOneWidget);
     expect(service.requests, 2);
   });
 
@@ -136,7 +136,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await _pumpFor(tester);
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Đăng nhập thành công'), findsOneWidget);
+    expect(find.text('Radar Discover'), findsOneWidget);
   });
 
   testWidgets('location service off: asks to turn on GPS and opens location settings', (tester) async {
@@ -161,7 +161,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await _pumpFor(tester);
     expect(find.text('Vào Cài đặt để bật'), findsOneWidget);
-    expect(find.text('Đăng nhập thành công'), findsNothing);
+    expect(find.text('Radar Discover'), findsNothing);
   });
 
   testWidgets('skip goes to Home without asking for permission', (tester) async {
@@ -170,7 +170,7 @@ void main() {
 
     await tester.tap(find.text('BỎ QUA'));
     await _pumpFor(tester, const Duration(milliseconds: 600));
-    expect(find.text('Đăng nhập thành công'), findsOneWidget);
+    expect(find.text('Radar Discover'), findsOneWidget);
     expect(service.requests, 0);
   });
 

@@ -125,6 +125,9 @@ void main() {
     await tester.tap(find.text('BỎ QUA'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Radar Discover'), findsOneWidget);
+    await tester.tap(find.text('Cá nhân'));
+    await tester.pump();
     expect(find.text('Xin chào, Sao Bang'), findsOneWidget);
     expect(find.byType(AvatarImage), findsOneWidget);
   });

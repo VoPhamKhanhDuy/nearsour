@@ -4,7 +4,7 @@ import '../theme/app_colors.dart';
 
 /// Thanh trên cùng của các màn thiết lập: nút back (nếu có), logo + NEARSOUL, nút phụ bên phải (nếu có).
 class OnboardingHeader extends StatelessWidget {
-  static const double _sideWidth = 72;
+  static const double _sideWidth = 88;
 
   /// Null = ẩn nút back (ví dụ màn đầu tiên sau khi đăng ký, không có gì để quay lại).
   final VoidCallback? onBack;
@@ -13,7 +13,16 @@ class OnboardingHeader extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  const OnboardingHeader({super.key, this.onBack, this.actionLabel, this.onAction});
+  /// Widget tuỳ ý ở góc phải (ví dụ badge "Online"); ưu tiên hơn [actionLabel].
+  final Widget? trailing;
+
+  const OnboardingHeader({
+    super.key,
+    this.onBack,
+    this.actionLabel,
+    this.onAction,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,33 +46,54 @@ class OnboardingHeader extends StatelessWidget {
                     child: IconButton(
                       onPressed: onBack,
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.arrow_back, color: AppColors.magenta),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.magenta,
+                      ),
                     ),
                   ),
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ClipOval(
-                  child: Image.asset('assets/images/logo.png', width: 24, height: 24, fit: BoxFit.cover),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'NEARSOUL',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 4,
+            // FittedBox: máy hẹp thì logo + chữ co lại thay vì tràn.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  const Text(
+                    'NEARSOUL',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 4,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(
             width: _sideWidth,
-            child: actionLabel == null
+            child: trailing != null
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: trailing,
+                    ),
+                  )
+                : actionLabel == null
                 ? null
                 : Align(
                     alignment: Alignment.centerRight,
@@ -77,7 +107,11 @@ class OnboardingHeader extends StatelessWidget {
                       ),
                       child: Text(
                         actionLabel!.toUpperCase(),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 1),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
                   ),

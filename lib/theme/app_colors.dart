@@ -22,6 +22,10 @@ class AppColors {
   static const textPrimary = Color(0xFFE3DFFF);
   static const textMuted = Color(0xFF94A3B8);
 
+  // Radar Discover
+  static const lilac = Color(0xFFD7BAFF);
+  static const statusOnline = Color(0xFF22C55E);
+
   // Màu báo lỗi (đỏ)
   static const error = Color(0xFFFF3B3B);
 

@@ -35,10 +35,10 @@ class MockUserStore {
       gender: 'male',
       avatarId: 4,
     ),
-    // Viết theo đúng chính tả bạn đã gõ ("gamil"), phòng khi dùng cách viết này để đăng nhập.
+    // Viết theo đúng chính tả bạn đã gõ ("gmail"), phòng khi dùng cách viết này để đăng nhập.
     AppUser(
       id: 'u3',
-      email: 'phamkhanhduyvo@gamil.com',
+      email: 'phamkhanhduyvo@gmail.com',
       password: '123456',
       nickname: 'Duy Vo',
       birthYear: 2003,
