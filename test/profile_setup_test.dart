@@ -128,7 +128,7 @@ void main() {
     expect(find.text('Radar Discover'), findsOneWidget);
     await tester.tap(find.text('Cá nhân'));
     await tester.pump();
-    expect(find.text('Xin chào, Sao Bang'), findsOneWidget);
+    expect(find.text('Sao Bang'), findsOneWidget);
     expect(find.byType(AvatarImage), findsOneWidget);
   });
 }

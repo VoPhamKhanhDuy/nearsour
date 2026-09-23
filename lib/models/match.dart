@@ -22,6 +22,7 @@ class Match {
   DateTime? requestExpiresAt; // now + 30s khi status chuyển sang pending
   DateTime? chatExpiresAt; // now + 48h khi vào trạng thái chatting
   String? meetRequestedBy; // ai đã bấm "Gặp nhau ngoài đời" (đề nghị hai chiều, chờ người kia xác nhận)
+  String? keepRequestedBy; // ai đã bấm "Giữ kết nối" sau buổi gặp (đề nghị hai chiều, chờ người kia xác nhận)
   DateTime? hiddenUntil; // không khớp Quiz: hai người ẩn khỏi radar của nhau tới lúc này (now + 24h)
   DateTime createdAt;
 
@@ -37,6 +38,7 @@ class Match {
     this.requestExpiresAt,
     this.chatExpiresAt,
     this.meetRequestedBy,
+    this.keepRequestedBy,
     this.hiddenUntil,
     DateTime? createdAt,
   }) : quizAnswers = quizAnswers ?? {},

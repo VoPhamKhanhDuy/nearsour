@@ -4,6 +4,8 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>NearSoul cần vị trí của bạn khi đang mở ứng dụng để phát hiện những người phù hợp trong bán kính 200m.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>NearSoul cần camera để quét mã QR khi xác thực hai bạn đã gặp nhau ngoài đời.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

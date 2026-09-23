@@ -8,6 +8,7 @@ import '../../widgets/auth_text_field.dart';
 import '../../widgets/cosmic_background.dart';
 import '../../widgets/nearsoul_logo.dart';
 import '../../widgets/primary_button.dart';
+import '../admin/admin_dashboard_screen.dart';
 import '../onboarding/radar_permission_screen.dart';
 import '../profile/profile_setup_screen.dart';
 
@@ -157,6 +158,15 @@ class _AuthScreenState extends State<AuthScreen> {
         _loading = false;
         _showError(e.field, e.message);
       });
+      return;
+    }
+
+    // Tài khoản admin đi thẳng vào NearSoul Admin, không qua luồng người dùng thường.
+    if (MockUserStore.currentUser?.isAdmin ?? false) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const AdminDashboardScreen()),
+        (_) => false,
+      );
       return;
     }
 

@@ -12,6 +12,8 @@ import '../../widgets/cosmic_background.dart';
 import '../../widgets/glow_card.dart';
 import '../../widgets/primary_button.dart';
 import '../main/main_shell.dart';
+import '../meet/meet_verify_screen.dart';
+import '../meet/post_meet_decision_screen.dart';
 import '../quiz/quiz_screen.dart' show kConnectionEndedMessage;
 
 /// Phòng chat ẩn danh 48 giờ: chỉ chữ (không ảnh, không liên kết).
@@ -55,6 +57,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   bool _partnerTyping = false;
   Timer? _ticker;
   Timer? _replyTimer;
+  Timer? _meetTimer;
 
   DateTime get _expiresAt => widget.match.chatExpiresAt ?? widget.now();
   Duration get _remaining => _expiresAt.difference(widget.now());
@@ -73,6 +76,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   void dispose() {
     _ticker?.cancel();
     _replyTimer?.cancel();
+    _meetTimer?.cancel();
     _input.dispose();
     super.dispose();
   }
@@ -227,9 +231,58 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   /// "Gặp nhau ngoài đời" là đề nghị hai chiều: bấm xong chỉ là chờ người kia, chưa lộ diện.
+  /// Mock: vì chưa có backend đẩy sự kiện thật, đối phương "đồng ý" sau một lúc rồi cùng vào xác thực QR.
   void _requestMeeting() {
-    widget.match.meetRequestedBy ??= _me.id;
+    if (widget.match.meetRequestedBy != null) return;
+    widget.match.meetRequestedBy = _me.id;
     setState(() {});
+    _meetTimer?.cancel();
+    _meetTimer = Timer(const Duration(seconds: 3), _openMeetVerify);
+  }
+
+  Future<void> _openMeetVerify() async {
+    if (!mounted) return;
+    final result = await Navigator.of(context).push<MeetVerifyResult>(
+      MaterialPageRoute<MeetVerifyResult>(
+        builder: (_) => MeetVerifyScreen(
+          match: widget.match,
+          me: _me,
+          partner: widget.partner,
+        ),
+      ),
+    );
+    if (!mounted) return;
+
+    switch (result) {
+      case MeetVerifyResult.success:
+        // TODO: mở khóa gửi ảnh trong chat nếu sau này quay lại chat được (chưa làm ở bước này).
+        widget.match.status = MatchStatus.metPending;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => PostMeetDecisionScreen(
+              match: widget.match,
+              me: _me,
+              partner: widget.partner,
+            ),
+          ),
+        );
+      case MeetVerifyResult.expired:
+        widget.match.meetRequestedBy =
+            null; // cho phép bấm "Gặp nhau ngoài đời" lại từ đầu
+        setState(() {});
+        _snack('Phiên xác thực gặp mặt đã hết hạn.');
+      case MeetVerifyResult.cancelled:
+        widget.match.meetRequestedBy = null;
+        setState(() {});
+      case null:
+        break;
+    }
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -786,47 +839,68 @@ class _Footer extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Material(
-            color: const Color(0xFF2B2546).withValues(alpha: 0.6),
-            shape: StadiumBorder(
-              side: BorderSide(color: AppColors.lilac.withValues(alpha: 0.2)),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: meetRequested
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: AppColors.lilac.withValues(alpha: 0.35),
+                        blurRadius: 22,
+                        spreadRadius: 1,
+                      ),
+                    ],
             ),
-            child: InkWell(
-              customBorder: const StadiumBorder(),
-              onTap: meetRequested ? null : onMeet,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 9,
+            child: Material(
+              color: meetRequested
+                  ? const Color(0xFF2B2546).withValues(alpha: 0.6)
+                  : AppColors.purple.withValues(alpha: 0.25),
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: meetRequested
+                      ? AppColors.lilac.withValues(alpha: 0.2)
+                      : AppColors.lilac.withValues(alpha: 0.7),
+                  width: meetRequested ? 1 : 1.4,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (meetRequested) ...[
-                      const Icon(
-                        Icons.schedule,
-                        size: 14,
-                        color: AppColors.lilac,
+              ),
+              child: InkWell(
+                customBorder: const StadiumBorder(),
+                onTap: meetRequested ? null : onMeet,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 11,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        meetRequested ? Icons.schedule : Icons.favorite,
+                        size: meetRequested ? 14 : 16,
+                        color: meetRequested
+                            ? AppColors.lilac.withValues(alpha: 0.7)
+                            : AppColors.lilac,
                       ),
                       const SizedBox(width: 8),
-                    ],
-                    Flexible(
-                      child: Text(
-                        meetRequested
-                            ? 'Đã gửi yêu cầu, chờ xác nhận...'
-                            : 'Gặp nhau ngoài đời',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: meetRequested
-                              ? AppColors.lilac.withValues(alpha: 0.7)
-                              : AppColors.lilac,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                      Flexible(
+                        child: Text(
+                          meetRequested
+                              ? 'Đã gửi yêu cầu, chờ xác nhận...'
+                              : 'Gặp nhau ngoài đời',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: meetRequested
+                                ? AppColors.lilac.withValues(alpha: 0.7)
+                                : Colors.white,
+                            fontSize: meetRequested ? 14 : 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

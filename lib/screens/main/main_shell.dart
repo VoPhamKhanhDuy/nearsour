@@ -14,7 +14,10 @@ class MainShell extends StatefulWidget {
   /// Dòng thông báo nhẹ hiện một lần khi vào màn (ví dụ "Kết nối đã kết thúc, tiếp tục quét...").
   final String? notice;
 
-  const MainShell({super.key, this.notice});
+  /// Tab mở sẵn (0 = Radar, 1 = Danh bạ, 2 = Cá nhân). Mặc định Radar.
+  final int initialTab;
+
+  const MainShell({super.key, this.notice, this.initialTab = 0});
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -39,7 +42,7 @@ class _MainShellState extends State<MainShell> {
     ),
   ];
 
-  int _index = 0;
+  late int _index = widget.initialTab;
 
   @override
   void initState() {

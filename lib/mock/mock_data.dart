@@ -57,6 +57,14 @@ class MockUserStore {
     ),
     // Chưa có hồ sơ ẩn danh: đăng nhập sẽ đi qua màn "Tạo hồ sơ của bạn".
     AppUser(id: 'u6', email: 'chuacohoso@gmail.com', password: '123456'),
+    // Đăng nhập bằng tài khoản này vào thẳng NearSoul Admin, không qua luồng người dùng thường.
+    AppUser(
+      id: 'admin1',
+      email: 'admin@nearsoul.app',
+      password: '123456',
+      nickname: 'Admin System',
+      isAdmin: true,
+    ),
   ];
 
   static int _nextUserId = 100; // tránh trùng id với các tài khoản mẫu
@@ -114,6 +122,20 @@ class MockUserStore {
       ..birthYear = birthYear
       ..gender = gender
       ..avatarId = avatarId;
+  }
+
+  /// Lưu thông tin THẬT (khác hồ sơ ẩn danh) — chỉ hiện với kết nối đã xác thực gặp mặt và đã vào Danh bạ.
+  static void updateRealProfile({
+    required String realName,
+    required String bio,
+    required String interests,
+  }) {
+    final user = _current;
+    if (user == null) return;
+    user
+      ..realName = realName.trim()
+      ..bio = bio.trim()
+      ..interests = interests.trim();
   }
 
   // ---- Radar: người ở gần (mock) ----
@@ -189,6 +211,10 @@ class MockUserStore {
     final user = _current;
     if (user == null || user.blockedUsers.contains(userId)) return;
     user.blockedUsers.add(userId);
+  }
+
+  static void unblockUser(String userId) {
+    _current?.blockedUsers.remove(userId);
   }
 
   // ---- Quiz ----

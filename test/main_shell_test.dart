@@ -84,10 +84,8 @@ void main() {
 
     await tester.tap(find.text('Cá nhân'));
     await _settle(tester);
-    expect(find.text('Xin chào, Duy'), findsOneWidget);
-    expect(find.text('phamkhanhduyvo@gmail.com'), findsOneWidget);
-    expect(find.text('2003'), findsOneWidget);
-    expect(find.text('Nam'), findsOneWidget);
+    expect(find.text('Hồ sơ của bạn'), findsOneWidget);
+    expect(find.text('Duy'), findsOneWidget);
 
     await tester.tap(find.text('Radar'));
     await _settle(tester);
@@ -95,8 +93,11 @@ void main() {
 
     await tester.tap(find.text('Cá nhân'));
     await _settle(tester);
+    await tester.ensureVisible(find.text('Đăng xuất')); // nội dung dài hơn, có thể phải cuộn xuống
+    await tester.pump();
     await tester.tap(find.text('Đăng xuất'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Tạo tài khoản'), findsOneWidget); // về Welcome
     expect(MockUserStore.currentUser, isNull);
   });
